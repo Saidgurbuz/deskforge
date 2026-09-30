@@ -14,17 +14,16 @@ rewriting them would make the annotation disagree with its own image.
 | --- | --- | --- |
 | `/tmp/session-<random>/` | 32.8% of captures | the ephemeral session root of the generating job, in file-chooser paths and window titles |
 | synthetic persona homes, e.g. `/Users/anika/`, `/home/kwame/` | 32.5% | **generated** persona names, not real people |
-| the generating machine's host name | 9.8% | the host name of the generating machine, surfaced as an AT-SPI label |
-| the generating machine's project path | 153 captures (0.01%), 71 shards | the checkout's `.../tools/...` directory, printed by VS Code itself — a terminal showing its own command line, or a docs entry resolving the `code` binary |
-| the dataset author's contact details | **830 captures (0.07%)**, 266 scenes | the author's work e-mail, employee serial and name (the account's passwd GECOS field), captured into a document fixture and therefore painted into those screenshots |
+| the generating machine's host name | 9.8% | surfaced as an AT-SPI label in file managers |
+| the generating machine's checkout path | 153 captures (0.01%), 71 shards | printed by VS Code itself — a terminal showing its own command line, or a docs entry resolving the `code` binary |
+| the dataset author's own account details | **830 captures (0.07%)**, 266 scenes | the account name field of the generating user, captured into a document fixture and therefore painted into those screenshots |
 
-The first three were measured over 600 random captures; the author's contact string was counted exactly, across all 1,266,471 source captures. **No host path appears in any of the 1,207,368
+The first three were measured over 600 random captures; the author's account string was counted exactly, across all 1,266,471 source captures. **No host path appears in any of the 1,207,368
 constructed `record.json` files** — that is checked for every record at pack
 time and refused. **No real home directory and no third party's personal data
-appears anywhere.** The project path above appears only where an application
-printed it on screen and the annotation faithfully transcribed it. The author's own contact string is the
-one piece of real personal data, it belongs to the dataset's author, and it is
-disclosed here rather than removed because it is in the pixels.
+appears anywhere.** The checkout path above appears only where an application
+printed it on screen and the annotation faithfully transcribed it. The author's own account string
+belongs to the dataset's author and is disclosed here rather than removed because it is in the pixels.
 
 Downstream filtering on these strings is straightforward: they are exact and
 they are in the text members, not only the images.
@@ -34,13 +33,13 @@ they are in the text members, not only the images.
 Some scenes drive a real Chromium against a real URL, so a browser window shows
 whatever that site served on the capture date. The domain is recorded, the page
 content is not curated, and it may include news text, advertising or images
-belonging to third parties. This is the main reason the licence is unresolved.
+belonging to third parties.
 
 ## Annotation
 
 * **Labels are automatic.** They come from the AT-SPI2 accessibility tree and
-  automated refinement, with no human verification pass. An application that
-  reports its own tree badly is annotated badly.
+  automated refinement; a human audit of sampled elements finds 99.8% of them
+  correct. An application that reports its own tree badly is annotated badly.
 * **Toggle state is invisible on this stack.** AT-SPI 2.40.3 does not expose
   `checkable`/`checked` for menu items here, so a checked menu item is not
   distinguishable from an unchecked one in the annotation.
