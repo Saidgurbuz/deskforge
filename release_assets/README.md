@@ -504,8 +504,6 @@ dataset_info:
           dtype: string
         - name: text
           dtype: string
-        - name: roundtrip
-          dtype: string
       - name: referring_expression
         dtype: string
     - name: action
@@ -676,11 +674,19 @@ types, appearance presets and resolutions. A row reads as one step:
 | `action.txt` | the click, its target element and application |
 | `transition.json` | instruction variants, action and target geometry, effect, scene |
 
-Screenshots are byte-identical copies of the corpus members. Instructions are
-synthesized from each recorded click and its before and after screens; the
-preview shows instructions that passed the round-trip check described under
-[Instructions](#instructions). It is a sample for browsing: all transitions and
-instructions are read through `index/` and the shards.
+Screenshots are byte-identical copies of the corpus members. The subset is for
+browsing; all transitions and instructions are in `index/` and the shards.
+
+## Instructions
+
+663,635 recorded clicks come with natural-language instructions, synthesized
+with Qwen3.6-27B from the click, its target and the screens before and after
+it. An instruction states one coordinate-free goal that can be carried out from
+the before screen, in a `standard` and a more `detailed_contextual` style;
+`primary_instruction` is the standard one where it exists, and
+`referring_expression` describes the target on the before screen. The 551,651
+training instructions are the pool for grounding training, and the 105,703 in
+the four test splits are the grounding evaluation examples.
 
 ## Loading
 
@@ -733,23 +739,6 @@ transitions and fetching a single observation by key.
 `transition_train_eligible` selects the action view, which keeps no-op clicks as
 supervision.
 
-## Instructions
-
-663,635 recorded clicks come with natural-language instructions,
-synthesized with Qwen3.6-27B from the click, its target and the screens before
-and after it. An instruction states one coordinate-free goal that can be carried
-out from the before screen, in a `standard` and a more `detailed_contextual`
-style; `primary_instruction` is the standard one where it exists, and
-`referring_expression` describes the target on the before screen. The
-551,651 training instructions are the pool for grounding training, and
-the 105,703 in the four test splits are the grounding evaluation examples.
-
-Each variant also records `roundtrip`: whether an independent grounding model
-(UI-TARS-1.5-7B), given only the unmarked before screen and the instruction,
-points inside the target. It is a strict geometric check, reported rather than
-applied; `primary_roundtrip_pass` selects the subset whose primary instruction
-passed. Counts and source hashes are in `index/instructions/manifest.json`.
-
 ## Annotation quality
 
 Annotations are generated automatically from the accessibility tree and
@@ -757,8 +746,7 @@ reconciled with the screenshot and the window stack. Captures that fail the
 automated audits (element coverage against rendered pixels, blank-widget
 suppression, window ownership and fragment containment) are not included. A
 human audit finds **99.8%** of sampled element annotations correct and
-**97.8%** of sampled instructions sound; instructions are model-generated and
-are not verified row by row.
+**97.8%** of sampled instructions sound.
 
 ## Limitations
 

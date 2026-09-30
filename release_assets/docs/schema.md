@@ -14,9 +14,8 @@ dots.
 ```
 
 `<key>` is `<shard>__<stem>`, e.g. `shard-0106__scene-002ad3e5b23cbfd9-step00`.
-It is shard-qualified because 152 capture stems and 128 scene ids repeat across
-shards — a scene a run failed to finish was recaptured by a later run under the
-same seed. `(shard, stem)` is unique across all 1,266,471 source rows.
+It is shard-qualified because a few scenes were captured in two shards, so a
+stem alone is not unique; `(shard, stem)` is.
 
 ## `leaf.json` — an element
 
@@ -52,9 +51,7 @@ the viewport (`record["screentag_grid"]`).
 
 ## `record.json`
 
-Constructed field by field from an allow list, never by removing fields from
-`meta.json`, so a change to the generator cannot quietly widen what is
-published. Carries `observation_key`, `scene_id`, `episode_id`, `step_index`,
+Scene metadata for the observation. Carries `observation_key`, `scene_id`, `episode_id`, `step_index`,
 `split`, `group`, `width`, `height`, `apps`, `theme`, `scene`, `n_elements`,
 `n_windows`, `window_stack`, `occlusion`, `flags`, `provenance`, and — on any
 observation that an action led to — `action_into_this_state` and
@@ -69,14 +66,13 @@ observation that an action led to — `action_into_this_state` and
 | `index/scenes.parquet` | scene | `split`, `split_source`, `apps`, `theme`, `resolution` |
 | `index/observations/<split>.parquet` | observation | `tar_path`, `*_member`, `occluded_ratio`, `n_elements`, `n_windows`, the flags |
 | `index/transitions/<split>.parquet` | transition | `before_key`, `after_key`, action fields, `effect`, `exclusion_reasons` |
-| `index/instructions/<split>.parquet` | transition with an instruction | `primary_instruction`, `instruction_variants`, `referring_expression`, `primary_roundtrip_pass` |
+| `index/instructions/<split>.parquet` | transition with an instruction | `primary_instruction`, `instruction_variants`, `referring_expression` |
 | `index/episodes/<split>.parquet` | episode | `observation_keys`, `transition_ids`, `episode_status` |
 | `index/shard_members.parquet` | tar member | `byte_offset`, `byte_size`, `sha256` |
 | `checksums/shard_stats.parquet` | tar | `bytes`, `sha256`, `observations` |
 
-`split_source` is `v3` for a scene placed by the finalized split and `extended`
-for one that split never had to place — 12,515 scenes, all of which are
-publishable but not state-train-eligible, so they had no row in it.
+`split_source` is `extended` for the 12,515 scenes that are published but not
+state-train-eligible, and `v3` for all others.
 
 ## Transitions
 
@@ -90,7 +86,7 @@ Step 0 has no action. Reading it the other way pairs every action with the
 screen it was not taken on, and nothing downstream would notice.
 
 Coordinates: `action_point_px` is authoritative. `action_point_norm_1000` and
-`action_point_screentag_500` are derived and round-trip to within one grid cell;
+`action_point_screentag_500` are derived from it and agree to within one grid cell;
 `action_target_bbox_px` is `[x0, y0, x1, y1]`.
 
 `effect` counts what changed between the endpoints — `changed`, `magnitude`,
@@ -98,8 +94,7 @@ Coordinates: `action_point_px` is authoritative. `action_point_norm_1000` and
 `newly_occluded`, `revealed`, `semantic_changes`, `persisted`.
 
 `exclusion_reasons` is empty when `transition_train_eligible` is true and
-otherwise names every rule the transition failed, so a count can always be
-accounted for.
+otherwise names every rule the transition failed.
 
 ## Instructions
 
@@ -112,30 +107,22 @@ instruction, joined to the corpus by `transition_id`, `before_key` and
 | `transition_id`, `split`, `before_key`, `after_key`, `target_uid` | the transition and its target element |
 | `action_type`, `action_point_px`, `action_target_bbox_px` | the recorded click, as in `index/transitions` |
 | `primary_style`, `primary_instruction` | the main instruction: `standard` where it exists, else `detailed_contextual` |
-| `instruction_variants` | every kept phrasing: `style`, `text` and `roundtrip` (`pass` or `fail`) |
+| `instruction_variants` | every phrasing, as `style` and `text` |
 | `referring_expression` | how the target is identified on the before screen |
-| `primary_roundtrip_pass` | whether the primary instruction passed the round trip |
 
-Instructions are coordinate-free: they name a goal, never a position. The round
-trip gives an independent grounding model (UI-TARS-1.5-7B) only the unmarked
-before screen and one instruction, and passes when its point falls inside the
-target's visible fragments. `manifest.json` records per-split counts, file
-hashes and the source hashes.
+Instructions are coordinate-free: they name a goal, never a position.
 
 ## `demo/preview.parquet`
 
-A stratified sample for the Hub's Dataset Viewer, one row per observation with
-the image inline. Stratified over split, theme, resolution, element density,
-occlusion band, static-against-episode, changed-against-no-op, and
-common-against-rare application, so the viewer's first page is not eight hundred
-screenshots of the same desktop.
+A stratified sample of observations, one row per observation with the image
+inline, for browsing without the shards. It is stratified over split, theme,
+resolution, element density, occlusion band, static against episode, changed
+against no-op, and common against rare application.
 
-**Its images are downscaled to 1024 px on the long edge.** The viewer
-thumbnails every row it renders, and at full resolution a row is about 850 KB,
-which made `first-rows` time out. This file is for browsing; `data/` is
-canonical. The downscaling costs nothing that the preview carries: ScreenTag is
-on a 0-500 grid normalized to the viewport, so it still describes the resized
-image, and `width`/`height` remain the original pixel dimensions.
+**Its images are downscaled to 1024 px on the long edge**; `data/` is
+canonical. ScreenTag is on a 0–500 grid normalized to the viewport, so it still
+describes the resized image, and `width`/`height` remain the original pixel
+dimensions.
 
 ## `demo/transitions/<split>.tar` — the `transitions_preview` subset
 
@@ -154,13 +141,5 @@ and resolution. The key is the `transition_id`; each sample has six members:
 
 `before.png` and `after.png` hash to the `sha256` of their members in
 `index/shard_members.parquet`. `target.png` is the only derived image: a crop of
-at least a quarter of the screen width, or three times the target, with the
-target box and click point drawn on it.
-
-Every instruction variant in `transition.json` carries a `roundtrip` result: an
-independent grounding model, given only the unmarked before screen and the
-instruction, must point inside the target's visible fragments. The preview's
-primary instruction always passed. Rows also require an eligible transition that
-changed the screen, a target of ordinary size, and a before screen with at least
-two windows and two applications; pages showing network-identifying web content
-are skipped.
+the before screen around the target, with the target box and click point drawn
+on it.
