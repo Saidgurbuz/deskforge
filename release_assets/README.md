@@ -32,6 +32,20 @@ configs:
     path: data/test_theme/*.tar
   - split: test_resolution
     path: data/test_resolution/*.tar
+- config_name: transitions_preview
+  data_files:
+  - split: train
+    path: demo/transitions/train.tar
+  - split: val
+    path: demo/transitions/val.tar
+  - split: test_id
+    path: demo/transitions/test_id.tar
+  - split: test_app
+    path: demo/transitions/test_app.tar
+  - split: test_theme
+    path: demo/transitions/test_theme.tar
+  - split: test_resolution
+    path: demo/transitions/test_resolution.tar
 dataset_info:
 - config_name: default
   features:
@@ -454,6 +468,123 @@ dataset_info:
     num_examples: 51627
   - name: test_resolution
     num_examples: 79212
+- config_name: transitions_preview
+  features:
+  - name: instruction.txt
+    dtype: string
+  - name: before.png
+    dtype: image
+  - name: target.png
+    dtype: image
+  - name: after.png
+    dtype: image
+  - name: action.txt
+    dtype: string
+  - name: transition.json
+    struct:
+    - name: transition_id
+      dtype: string
+    - name: episode_id
+      dtype: string
+    - name: action_index
+      dtype: int64
+    - name: before_key
+      dtype: string
+    - name: after_key
+      dtype: string
+    - name: instruction
+      struct:
+      - name: text
+        dtype: string
+      - name: style
+        dtype: string
+      - name: variants
+        list:
+        - name: style
+          dtype: string
+        - name: text
+          dtype: string
+        - name: roundtrip
+          dtype: string
+      - name: referring_expression
+        dtype: string
+    - name: action
+      struct:
+      - name: type
+        dtype: string
+      - name: point_px
+        list: int64
+      - name: point_norm_1000
+        list: int64
+      - name: target
+        struct:
+        - name: uid
+          dtype: string
+        - name: role
+          dtype: string
+        - name: kind
+          dtype: string
+        - name: text
+          dtype: string
+        - name: app
+          dtype: string
+        - name: bbox_px
+          list: int64
+        - name: bbox_norm_1000
+          list: int64
+    - name: effect
+      struct:
+      - name: changed
+        dtype: bool
+      - name: magnitude
+        dtype: float64
+      - name: appeared
+        dtype: int64
+      - name: disappeared
+        dtype: int64
+      - name: moved
+        dtype: int64
+      - name: text_changed
+        dtype: int64
+      - name: state_changed
+        dtype: int64
+      - name: newly_occluded
+        dtype: int64
+      - name: revealed
+        dtype: int64
+      - name: semantic_changes
+        dtype: int64
+      - name: persisted
+        dtype: int64
+    - name: scene
+      struct:
+      - name: apps
+        list: string
+      - name: theme
+        dtype: string
+      - name: resolution
+        dtype: string
+      - name: width
+        dtype: int64
+      - name: height
+        dtype: int64
+  - name: __key__
+    dtype: string
+  - name: __url__
+    dtype: string
+  splits:
+  - name: train
+    num_examples: 100
+  - name: val
+    num_examples: 100
+  - name: test_id
+    num_examples: 100
+  - name: test_app
+    num_examples: 100
+  - name: test_theme
+    num_examples: 100
+  - name: test_resolution
+    num_examples: 100
 ---
 
 # DeskForge-1M
@@ -523,8 +654,30 @@ observation is four members sharing one key:
 Alongside the shards, `index/` holds Parquet tables for observations,
 transitions, episodes and scenes: `index/transitions/<split>.parquet` lists every
 recorded click with its before and after observation keys, target element and
-effect. `demo/` holds a small stratified sample with images inline (downscaled
-to 1024 px). The field reference is in [`docs/schema.md`](docs/schema.md).
+effect. `demo/` holds browsing samples: stratified observations with images
+inline (downscaled to 1024 px) and the `transitions_preview` shards below. The
+field reference is in [`docs/schema.md`](docs/schema.md).
+
+### Browsing transitions
+
+The `transitions_preview` subset shows recorded clicks in the Dataset Viewer:
+100 per split, each from a different episode, varied over applications, element
+types, appearance presets and resolutions. A row reads as one step:
+
+| member | content |
+| --- | --- |
+| `instruction.txt` | a natural-language instruction for the click |
+| `before.png` | the screen the click was taken on |
+| `target.png` | the clicked element, cropped from the before screen and outlined |
+| `after.png` | the screen the click produced |
+| `action.txt` | the click, its target element and application |
+| `transition.json` | instruction variants, action and target geometry, effect, scene |
+
+Screenshots are byte-identical copies of the corpus members. Instructions are
+synthesized from each recorded click and its before and after screens; the
+preview shows instructions that an independent grounding model located on the
+before screen alone. It is a sample for browsing: all 917,211 transitions are
+read through `index/transitions` and the shards.
 
 ## Loading
 
@@ -535,6 +688,9 @@ from datasets import load_dataset
 ds = load_dataset("docling-project/DeskForge-1M", split="test_app", streaming=True)
 sample = next(iter(ds))
 sample["png"], sample["leaf.json"], sample["screentag.txt"], sample["record.json"]
+
+# Browse recorded clicks: instruction, before, clicked element, after.
+preview = load_dataset("docling-project/DeskForge-1M", "transitions_preview", split="val")
 
 # Transitions: before/after keys, the clicked target and what changed.
 transitions = load_dataset(

@@ -114,3 +114,31 @@ which made `first-rows` time out. This file is for browsing; `data/` is
 canonical. The downscaling costs nothing that the preview carries: ScreenTag is
 on a 0-500 grid normalized to the viewport, so it still describes the resized
 image, and `width`/`height` remain the original pixel dimensions.
+
+## `demo/transitions/<split>.tar` — the `transitions_preview` subset
+
+A browsing sample of recorded clicks for the Dataset Viewer, 100 per split, one
+per episode, varied over target application, element role, appearance preset
+and resolution. The key is the `transition_id`; each sample has six members:
+
+```
+<transition_id>.instruction.txt   primary instruction for the click
+<transition_id>.before.png        the before observation's PNG, byte-identical
+<transition_id>.target.png        crop of the before screen around the target, outlined
+<transition_id>.after.png         the after observation's PNG, byte-identical
+<transition_id>.action.txt        e.g. click (1521, 688) on table column header "Compressed" in xarchiver
+<transition_id>.transition.json   ids, instruction variants, action, target, effect, scene
+```
+
+`before.png` and `after.png` hash to the `sha256` of their members in
+`index/shard_members.parquet`. `target.png` is the only derived image: a crop of
+at least a quarter of the screen width, or three times the target, with the
+target box and click point drawn on it.
+
+Every instruction variant in `transition.json` carries a `roundtrip` result: an
+independent grounding model, given only the unmarked before screen and the
+instruction, must point inside the target's visible fragments. The preview's
+primary instruction always passed. Rows also require an eligible transition that
+changed the screen, a target of ordinary size, and a before screen with at least
+two windows and two applications; pages showing network-identifying web content
+are skipped.
