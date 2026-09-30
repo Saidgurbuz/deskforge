@@ -371,7 +371,7 @@ def _deep_check(tar, by_name, keys, rng) -> Dict[str, Any]:
 #: Fatal patterns say something about the *machine* the corpus was generated
 #: on, which is nobody's business and is never on screen. Disclosed patterns
 #: are things a reader can see in the screenshots: the author has accepted
-#: them, and `docs/known_issues.md` states them rather than pretending they are
+#: them, and the release states them rather than pretending they are
 #: not there. Both are taken from the machine running the check: the checkout
 #: and home directory are fatal; anything accepted as visible (a host name, the
 #: author's own details in a fixture) is listed in DESKSHOT_DISCLOSED_PATTERNS as
@@ -428,11 +428,11 @@ def verify_privacy(release: Path, report: Report, tars_to_scan: int) -> Dict[str
         fatal_count = found[name + " (in a constructed record)"]
         report.check("no %s in any constructed record" % name, not fatal_count, fatal_count)
         if found[name]:
-            report.check("%s in on-screen text: disclosed in docs/known_issues.md" % name,
+            report.check("%s in on-screen text: disclosed" % name,
                          True, "%d of %s members scanned"
                          % (found[name], "{:,}".format(scanned)), fatal=False)
     for name in DISCLOSED_IDENTIFIERS:
-        report.check("%s: disclosed in docs/known_issues.md" % name, True,
+        report.check("%s: disclosed" % name, True,
                      "%d of %s members scanned"
                      % (found[name], "{:,}".format(scanned)), fatal=False)
     return {"members_scanned": scanned, **{k: v for k, v in found.items()}}

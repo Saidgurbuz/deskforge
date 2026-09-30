@@ -156,7 +156,7 @@ ALLOWED_TOP_LEVEL = frozenset({
 #: username appears anywhere in the released text. What does appear is the
 #: ephemeral session root `/tmp/session-<random>/` (32.8%) and synthetic
 #: persona homes such as `/Users/anika/` (32.5%), both generated, plus the host
-#: name (9.8%). All three are recorded in `docs/known_issues.md`.
+#: name (9.8%).
 VERBATIM_ONSCREEN_TEXT = (
     ("window_stack", "*", "name"),
     ("action_into_this_state", "target_text"),

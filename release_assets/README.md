@@ -582,7 +582,7 @@ macOS-inspired presets reproduce the look of those systems rather than run them.
 Actions are clicks from undirected exploration, not goal-directed
 demonstrations. Because annotations transcribe what is on screen, text drawn by
 applications (for example session paths or live web content in browser scenes)
-is part of the data. Details are in [`docs/known_issues.md`](docs/known_issues.md).
+is part of the data.
 
 ## License
 
