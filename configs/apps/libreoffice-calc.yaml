@@ -1,0 +1,17 @@
+app_name: libreoffice-calc
+binary: soffice
+args:
+  - --calc
+  - --nologo
+  - --norestore
+  - --nofirststartwizard
+atspi_name: soffice
+window_titles:
+  - LibreOffice Calc
+  - Calc
+interactions:
+  - name: default
+    description: Default Calc window
+    actions:
+      - type: wait
+        value: "3.0"

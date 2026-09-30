@@ -1,0 +1,205 @@
+[
+  {
+    "page": 1,
+    "label": "Heading",
+    "bbox": {
+      "x0": 56.0,
+      "y0": 38.0,
+      "x1": 450.0,
+      "y1": 72.0,
+      "w": 394.0,
+      "h": 34.0
+    },
+    "text": "Quarterly Systems Reliability Report"
+  },
+  {
+    "page": 1,
+    "label": "Text",
+    "bbox": {
+      "x0": 56.0,
+      "y0": 92.0,
+      "x1": 539.0,
+      "y1": 160.0,
+      "w": 483.0,
+      "h": 68.0
+    },
+    "text": "This synthetic report is used to validate dense annotation on PDF reader surfaces. It contains headings, paragraphs, a simple table, and a labeled figure so the extraction pipeline can be checked against a realistic mix of document content."
+  },
+  {
+    "page": 1,
+    "label": "Table",
+    "bbox": {
+      "x0": 56.0,
+      "y0": 196.0,
+      "x1": 456.0,
+      "y1": 316.0,
+      "w": 400.0,
+      "h": 120.0
+    },
+    "caption_bbox": {
+      "x0": 56.0,
+      "y0": 168.0,
+      "x1": 456.0,
+      "y1": 192.0,
+      "w": 400.0,
+      "h": 24.0
+    },
+    "caption": "Table 1. Release Validation Metrics",
+    "rows": 5,
+    "cols": 3,
+    "text": "Table 1. Release Validation Metrics Metric Observed Target Availability 99.97% 99.90% P95 latency 184 ms < 220 ms Failed jobs 3 < 8 Hotfixes 1 < 2"
+  },
+  {
+    "page": 1,
+    "label": "Image",
+    "subtype": "Figure",
+    "bbox": {
+      "x0": 56.0,
+      "y0": 370.0,
+      "x1": 516.0,
+      "y1": 510.0,
+      "w": 460.0,
+      "h": 140.0
+    },
+    "caption_bbox": {
+      "x0": 56.0,
+      "y0": 342.0,
+      "x1": 336.0,
+      "y1": 366.0,
+      "w": 280.0,
+      "h": 24.0
+    },
+    "caption": "Figure 1. Service topology sketch",
+    "text": "Figure 1. Service topology sketch Load Balancer API Workers Postgres"
+  },
+  {
+    "page": 1,
+    "label": "Text",
+    "bbox": {
+      "x0": 56.0,
+      "y0": 600.0,
+      "x1": 539.0,
+      "y1": 720.0,
+      "w": 483.0,
+      "h": 120.0
+    },
+    "text": "Summary The release met all service-level objectives. Operator-visible incidents dropped, rollback time improved, and batch backfill jobs finished within the planned window."
+  },
+  {
+    "page": 2,
+    "label": "Heading",
+    "bbox": {
+      "x0": 56.0,
+      "y0": 40.0,
+      "x1": 370.0,
+      "y1": 72.0,
+      "w": 314.0,
+      "h": 32.0
+    },
+    "text": "Appendix A. Deployment Notes"
+  },
+  {
+    "page": 2,
+    "label": "List",
+    "bbox": {
+      "x0": 72.0,
+      "y0": 98.0,
+      "x1": 539.0,
+      "y1": 194.0,
+      "w": 467.0,
+      "h": 96.0
+    },
+    "items": [
+      "Staging soak time was extended from 6 to 10 hours.",
+      "The Europe-West replica was promoted during the March maintenance window.",
+      "The backup restore drill recovered 1.4 TB in 37 minutes.",
+      "Runbook update R-219 added a branch for queue-depth mitigation."
+    ],
+    "item_bboxes": [
+      {
+        "x0": 72.0,
+        "y0": 98.0,
+        "x1": 539.0,
+        "y1": 118.0,
+        "w": 467.0,
+        "h": 20.0
+      },
+      {
+        "x0": 72.0,
+        "y0": 124.0,
+        "x1": 539.0,
+        "y1": 144.0,
+        "w": 467.0,
+        "h": 20.0
+      },
+      {
+        "x0": 72.0,
+        "y0": 150.0,
+        "x1": 539.0,
+        "y1": 170.0,
+        "w": 467.0,
+        "h": 20.0
+      },
+      {
+        "x0": 72.0,
+        "y0": 176.0,
+        "x1": 539.0,
+        "y1": 196.0,
+        "w": 467.0,
+        "h": 20.0
+      }
+    ]
+  },
+  {
+    "page": 2,
+    "label": "Heading",
+    "bbox": {
+      "x0": 56.0,
+      "y0": 244.0,
+      "x1": 190.0,
+      "y1": 268.0,
+      "w": 134.0,
+      "h": 24.0
+    },
+    "text": "Operator checklist"
+  },
+  {
+    "page": 2,
+    "label": "Text",
+    "bbox": {
+      "x0": 56.0,
+      "y0": 286.0,
+      "x1": 539.0,
+      "y1": 396.0,
+      "w": 483.0,
+      "h": 110.0
+    },
+    "text": "1. Verify dashboards are green. 2. Confirm alert routing and on-call ownership. 3. Check replication lag, worker queue depth, and canary response time. 4. Archive screenshots and incident notes in the release folder."
+  },
+  {
+    "page": 2,
+    "label": "Heading",
+    "bbox": {
+      "x0": 56.0,
+      "y0": 420.0,
+      "x1": 198.0,
+      "y1": 444.0,
+      "w": 142.0,
+      "h": 24.0
+    },
+    "text": "Example command"
+  },
+  {
+    "page": 2,
+    "label": "Code snippet",
+    "bbox": {
+      "x0": 56.0,
+      "y0": 458.0,
+      "x1": 539.0,
+      "y1": 560.0,
+      "w": 483.0,
+      "h": 102.0
+    },
+    "text": "kubectl rollout status deploy/api --timeout=180s\npython tools/check_release.py --env prod --report metrics.csv\ntar -czf release_bundle.tgz notes.md screenshots/ metrics.csv"
+  }
+]

@@ -1,0 +1,31 @@
+# Zim — offline desktop wiki / notes app
+app_name: zim
+binary: zim
+atspi_name: zim
+args:
+  - --standalone
+  - /tmp/session_zim_notebook
+window_titles:
+  - Zim
+  - Project Notes
+
+interactions:
+  - name: default
+    description: Open Zim with a deterministic local notebook
+    actions:
+      - type: wait
+        value: "2.0"
+
+  - name: search
+    description: Open the notebook search dialog
+    actions:
+      - type: key
+        value: "ctrl+f"
+        delay: 1.0
+
+  - name: file_menu
+    description: Open the File menu
+    actions:
+      - type: key
+        value: "alt+f"
+        delay: 1.0

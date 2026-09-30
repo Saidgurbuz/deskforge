@@ -1,0 +1,4 @@
+DeskShot comparison fixture
+version = right
+status = revised
+owner = team-b

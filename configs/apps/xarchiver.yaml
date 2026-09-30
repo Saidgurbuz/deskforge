@@ -1,0 +1,57 @@
+# Xarchiver
+app_name: xarchiver
+binary: xarchiver
+atspi_name: xarchiver
+args:
+  - ${DESKFORGE_ROOT}/assets/audit/workspace_probe_archive.zip
+window_titles:
+  - Xarchiver
+  - Archive manager
+  - xarchiver
+
+interactions:
+  - name: default
+    description: Archive manager opened on a deterministic local sample archive
+    actions:
+      - type: wait
+        value: "2.5"
+
+  - name: menu_open
+    description: Open the application menu for a richer archive-manager state
+    actions:
+      - type: wait
+        value: "1.0"
+      - type: key
+        value: "F10"
+        delay: 1.0
+
+  - name: heuristic_probe
+    description: Click a seeded visible archive control or row
+    actions:
+      - type: wait
+        value: "1.0"
+      - type: heuristic_click
+        value: "random|19"
+        delay: 1.0
+
+chains:
+  - name: archive_progressive
+    description: Capture baseline archive view, menu state, then one seeded visible click
+    steps:
+      - name: baseline
+        actions:
+          - type: wait
+            value: "2.5"
+        capture: true
+      - name: menu_open
+        actions:
+          - type: key
+            value: "F10"
+            delay: 1.0
+        capture: true
+      - name: heuristic_click
+        actions:
+          - type: heuristic_click
+            value: "random|21"
+            delay: 1.0
+        capture: true

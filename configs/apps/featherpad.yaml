@@ -1,0 +1,34 @@
+# FeatherPad — Qt text editor candidate
+app_name: featherpad
+binary: featherpad
+atspi_name: featherpad
+args:
+  - ${DESKFORGE_ROOT}/assets/audit/sample_notes.md
+window_titles:
+  - meeting_notes.md
+  - FeatherPad
+
+env:
+  QT_ACCESSIBILITY: "1"
+  QT_LINUX_ACCESSIBILITY_ALWAYS_ON: "1"
+
+interactions:
+  - name: default
+    description: Open FeatherPad with deterministic notes
+    actions:
+      - type: wait
+        value: "2.0"
+
+  - name: find_dialog
+    description: Open search dialog/bar
+    actions:
+      - type: key
+        value: "ctrl+f"
+        delay: 1.0
+
+  - name: file_menu
+    description: Open the File menu
+    actions:
+      - type: key
+        value: "alt+f"
+        delay: 1.0

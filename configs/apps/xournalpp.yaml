@@ -1,0 +1,14 @@
+# Xournal++
+app_name: xournalpp
+binary: xournalpp
+atspi_name: com.github.xournalpp.xournalpp
+window_titles:
+  - Xournal++
+  - com.github.xournalpp.xournalpp
+
+interactions:
+  - name: default
+    description: Xournal++ opened to a blank notebook canvas
+    actions:
+      - type: wait
+        value: "2.5"

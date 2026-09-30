@@ -1,0 +1,150 @@
+# GNOME Calculator — lightweight app with many widgets
+app_name: gnome-calculator
+binary: gnome-calculator
+atspi_name: gnome-calculator
+window_titles: ["Calculator"]
+
+interactions:
+  - name: default
+    description: Default calculator view (basic mode)
+    actions:
+      - type: wait
+        value: "1.0"
+
+  - name: basic_input
+    description: Type a calculation
+    actions:
+      - type: key
+        value: "1"
+      - type: key
+        value: "plus"
+      - type: key
+        value: "2"
+      - type: key
+        value: "Return"
+        delay: 0.5
+
+  - name: menu_open
+    description: Open the hamburger/app menu
+    actions:
+      - type: key
+        value: "F10"
+        delay: 0.8
+
+  - name: keyboard_mode
+    description: Switch to advanced/keyboard mode
+    actions:
+      - type: key
+        value: "ctrl+k"
+        delay: 1.0
+
+  - name: about_dialog
+    description: Open About dialog
+    actions:
+      - type: key
+        value: "F10"
+        delay: 0.5
+      # Navigate to About (last item)
+      - type: key
+        value: "Up"
+      - type: key
+        value: "Return"
+        delay: 1.0
+
+  - name: multiwindow_firefox
+    description: Calculator window with Firefox companion window
+    companion_apps: ["firefox"]
+    actions:
+      - type: wait
+        value: "1.0"
+
+  - name: multiwindow_firefox_partial_overlap
+    description: Firefox in front with partial occlusion over calculator
+    companion_apps: ["firefox"]
+    actions_after_companions: true
+    actions:
+      - type: window_focus
+        value: "Calculator"
+        delay: 0.2
+      - type: window_move_active
+        value: "1500|620"
+        delay: 0.3
+      - type: window_focus
+        value: "Mozilla Firefox"
+        delay: 0.2
+      - type: window_move_active
+        value: "280|40"
+        delay: 0.5
+      - type: wait
+        value: "1.0"
+
+chains:
+  - name: progressive_usage
+    description: Capture a small progression of calculator usage in one session
+    steps:
+      - name: empty
+        description: Freshly opened calculator
+        actions:
+          - type: wait
+            value: "1.0"
+        capture: true
+      - name: result_shown
+        description: A simple arithmetic result is visible
+        actions:
+          - type: key
+            value: "1"
+          - type: key
+            value: "plus"
+          - type: key
+            value: "2"
+          - type: key
+            value: "Return"
+            delay: 0.6
+        capture: true
+      - name: menu_open
+        description: Calculator menu opened after usage
+        actions:
+          - type: key
+            value: "F10"
+            delay: 0.8
+        capture: true
+
+  - name: heuristic_explore
+    description: Explore calculator with heuristic seeded clicks instead of fully hand-authored input
+    steps:
+      - name: empty
+        actions:
+          - type: wait
+            value: "1.0"
+        capture: true
+      - name: heuristic_click_one
+        actions:
+          - type: heuristic_click
+            value: "button_random|17"
+            delay: 0.8
+        capture: true
+      - name: heuristic_click_two
+        actions:
+          - type: heuristic_click
+            value: "button_random|29"
+            delay: 0.8
+        capture: true
+
+  - name: multiwindow_scatter
+    description: Launch Chromium companion and scatter both windows for layout diversity
+    steps:
+      - name: baseline
+        actions:
+          - type: wait
+            value: "1.0"
+        capture: true
+      - name: with_browser_scattered
+        companion_apps: ["chromium-browser"]
+        actions_after_companions: true
+        actions:
+          - type: wait
+            value: "3.0"
+          - type: randomize_layout
+            value: "scatter"
+            delay: 0.8
+        capture: true

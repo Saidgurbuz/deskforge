@@ -1,0 +1,39 @@
+# Geany — lightweight code editor / IDE
+app_name: geany
+binary: geany
+atspi_name: geany
+args:
+  - ${DESKFORGE_ROOT}/assets/audit/sample_script.py
+window_titles:
+  - pipeline_utils.py - Geany
+  - Geany
+
+interactions:
+  - name: default
+    description: Open Geany with a deterministic Python file
+    actions:
+      - type: wait
+        value: "2.0"
+
+  - name: audit_probe
+    description: Qualification probe with the File menu opened
+    actions:
+      - type: wait
+        value: "1.5"
+      - type: key
+        value: "alt+f"
+        delay: 1.0
+
+  - name: search_dialog
+    description: Open search dialog on top of the loaded editor
+    actions:
+      - type: key
+        value: "ctrl+f"
+        delay: 1.0
+
+  - name: file_menu
+    description: Open the File menu
+    actions:
+      - type: key
+        value: "alt+f"
+        delay: 1.0

@@ -1,0 +1,41 @@
+[project]
+name = "deskforge"
+version = "1.0.0"
+description = "DeskForge: a controllable desktop environment that composes and explores real applications to generate dense supervision for computer-use agents"
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [
+    { name = "A. Said Gurbuz" },
+    { name = "Ahmed Nassar" },
+    { name = "Sunghwan Hong" },
+    { name = "Marc Pollefeys" },
+    { name = "Peter W. J. Staar" },
+]
+dependencies = [
+    "PyYAML>=6.0",
+    "Pillow>=9.0",
+    "tqdm>=4.60",
+    "numpy>=1.21",
+]
+
+[project.optional-dependencies]
+# Release packing, verification and the audit-queue joins read Parquet.
+release = ["pyarrow>=12"]
+# Building the document-semantics sidecars for the PDF viewer apps.
+pdf = ["pymupdf>=1.23"]
+test = ["pytest>=7", "pymupdf>=1.23", "pyarrow>=12"]
+
+[project.urls]
+Homepage = "https://saidgurbuz.github.io/deskforge/"
+
+[project.scripts]
+# `deskshot` is the package's working name; both commands run the same CLI.
+deskforge = "deskshot.cli:main"
+dsd = "deskshot.cli:main"
+
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]

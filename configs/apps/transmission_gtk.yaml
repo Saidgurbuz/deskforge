@@ -1,0 +1,32 @@
+# Transmission GTK — offline transfer manager candidate
+app_name: transmission-gtk
+binary: transmission-gtk
+atspi_name: transmission-gtk
+args:
+  - ${DESKFORGE_ROOT}/assets/audit/sample_transfer.torrent
+window_titles:
+  - Transmission
+
+env:
+  GTK_MODULES: gail:atk-bridge
+
+interactions:
+  - name: default
+    description: Open Transmission with a deterministic sample torrent prompt/list
+    actions:
+      - type: wait
+        value: "2.5"
+
+  - name: preferences
+    description: Open preferences dialog
+    actions:
+      - type: key
+        value: "ctrl+p"
+        delay: 1.0
+
+  - name: file_menu
+    description: Open the File menu
+    actions:
+      - type: key
+        value: "alt+f"
+        delay: 1.0

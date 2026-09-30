@@ -1,0 +1,21 @@
+# GNOME System Monitor
+app_name: gnome-system-monitor
+binary: gnome-system-monitor
+atspi_name: gnome-system-monitor
+window_titles: ["System Monitor", "GNOME System Monitor", "gnome-system-monitor"]
+
+interactions:
+  - name: default
+    description: Default monitor view with process list and tabs
+    actions:
+      - type: wait
+        value: "2.5"
+
+  - name: next_tab
+    description: Move to the next monitor tab for a second deterministic state
+    actions:
+      - type: wait
+        value: "1.5"
+      - type: key
+        value: "ctrl+Page_Down"
+        delay: 1.0

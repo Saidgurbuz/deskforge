@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DeskForge: Dense Supervision from Desktop Environments for Computer-Use Agents</title>
+<meta name="description" content="DeskForge composes and explores real desktop applications in controllable scenes to generate dense supervision for computer-use agents. DeskForge-1M: 1.2M annotated desktop observations, 159.7M element instances, 917K recorded click transitions.">
+<meta name="author" content="A. Said Gurbuz, Ahmed Nassar, Sunghwan Hong, Marc Pollefeys, Peter W. J. Staar">
+<meta property="og:title" content="DeskForge: Dense Supervision from Desktop Environments for Computer-Use Agents">
+<meta property="og:description" content="A controllable desktop environment and a 1.2M-observation densely annotated corpus that improve GUI grounding and long-horizon computer use.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://saidgurbuz.github.io/deskforge/">
+<meta property="og:site_name" content="DeskForge">
+<meta property="og:image" content="https://saidgurbuz.github.io/deskforge/assets/img/social-card.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Overview of DeskForge and DeskForge-1M">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="DeskForge: Dense Supervision from Desktop Environments for Computer-Use Agents">
+<meta name="twitter:description" content="A controllable desktop environment and a 1.2M-observation densely annotated corpus that improve GUI grounding and long-horizon computer use.">
+<meta name="twitter:image" content="https://saidgurbuz.github.io/deskforge/assets/img/social-card.jpg">
+<link rel="canonical" href="https://saidgurbuz.github.io/deskforge/">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1114" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&family=Source+Serif+4:opsz,wght@8..60,400..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="preload" as="image" href="assets/img/overview-1200.webp" imagesrcset="assets/img/overview-1200.webp 1200w, assets/img/overview-2400.webp 2400w" imagesizes="(max-width: 1280px) 100vw, 1232px">
+<script>try{var t=localStorage.getItem("df-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body>
+
+<nav class="nav" aria-label="Sections">
+  <div class="wrap-wide nav-inner">
+    <a class="brand" href="#top">
+      <svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="4" width="13" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="8.5" y="10" width="13" height="10" rx="2" fill="var(--accent)" stroke="var(--accent)" stroke-width="1.7"/><path d="M8.5 13h13" stroke="var(--bg)" stroke-width="1.4"/></svg>
+      DeskForge
+    </a>
+    <div class="nav-links">
+      <a href="#abstract">Overview</a>
+      <a href="#demo">Demo</a>
+      <a href="#framework">Framework</a>
+      <a href="#dataset">Dataset</a>
+      <a href="#results">Results</a>
+      <a href="#citation">Citation</a>
+    </div>
+    <button class="theme-btn" id="theme-btn" type="button" aria-label="Toggle theme"></button>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap">
+    <h1>DeskForge</h1>
+    <p class="subtitle">Dense Supervision from Desktop Environments for Computer&#8209;Use&nbsp;Agents</p>
+    <div class="authors">
+      <span class="au"><a href="https://saidgurbuz.github.io/">A. Said Gurbuz</a><sup>1,2</sup></span>
+      <span class="au"><a href="https://research.ibm.com/people/ahmed-nassar">Ahmed Nassar</a><sup>2</sup></span>
+      <span class="au"><a href="https://sunghwanhong.github.io/">Sunghwan Hong</a><sup>1</sup></span>
+      <span class="au"><a href="https://cvg.ethz.ch/team/Prof-Dr-Marc-Pollefeys">Marc Pollefeys</a><sup>1,3</sup></span>
+      <span class="au"><a href="https://research.ibm.com/people/peter-staar">Peter W. J. Staar</a><sup>2</sup></span>
+    </div>
+    <div class="affil"><span><sup>1</sup>ETH Zurich</span><span><sup>2</sup>IBM Research Zurich</span><span><sup>3</sup>Microsoft</span></div>
+    <div class="logos" aria-label="Affiliations">
+      <a href="https://ethz.ch/en.html" title="ETH Zurich"><img class="mono" src="assets/logos/eth-zurich.svg" alt="ETH Zurich" height="22" style="height:22px"></a>
+      <a href="https://research.ibm.com/labs/zurich" title="IBM Research Zurich" class="ibm"><img class="mono" src="assets/logos/ibm.svg" alt="IBM" height="24" style="height:24px"><span>Research</span></a>
+      <a href="https://github.com/docling-project/docling" title="Docling" class="docling"><img src="assets/logos/docling.svg" alt="" height="34" style="height:34px"><span>Docling</span></a>
+      <a href="https://www.microsoft.com/en-us/research/" title="Microsoft"><img src="assets/logos/microsoft.svg" alt="Microsoft" height="24" style="height:24px"></a>
+    </div>
+    <div class="links">
+      <a class="btn primary" aria-disabled="true" role="link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6 2.8h8l4.5 4.5v13.9H6z"/><path d="M14 2.8v4.5h4.5M9 12.5h6M9 16h6"/></svg>Paper<span class="soon" style="color:inherit;opacity:.7">soon</span></a>
+      <a class="btn" aria-disabled="true" role="link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20 12 4l8 16M7.5 13h9"/></svg>arXiv<span class="soon">soon</span></a>
+      <a class="btn" aria-disabled="true" role="link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m8.5 7.5-5 4.5 5 4.5M15.5 7.5l5 4.5-5 4.5"/></svg>Code<span class="soon">soon</span></a>
+      <a class="btn" aria-disabled="true" role="link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><ellipse cx="12" cy="5.5" rx="7.5" ry="2.7"/><path d="M4.5 5.5v13c0 1.5 3.4 2.7 7.5 2.7s7.5-1.2 7.5-2.7v-13M4.5 12c0 1.5 3.4 2.7 7.5 2.7s7.5-1.2 7.5-2.7"/></svg>Dataset<span class="soon">soon</span></a>
+      <a class="btn" aria-disabled="true" role="link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="m12 2.8 8 4.6v9.2l-8 4.6-8-4.6V7.4z"/><path d="m4 7.4 8 4.6 8-4.6M12 12v9.2"/></svg>Models<span class="soon">soon</span></a>
+      <a class="btn" href="#citation"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M5 3.5h11.5l2.5 2.5v14.5H5z"/><path d="M8.5 9h7M8.5 12.5h7M8.5 16h4"/></svg>BibTeX</a>
+    </div>
+  </div>
+  <div class="wrap-wide teaser">
+    <figure>
+      <div class="frame zoomable" data-full="assets/img/overview-2400.webp">
+        <img src="assets/img/overview-1200.webp" srcset="assets/img/overview-1200.webp 1200w, assets/img/overview-2400.webp 2400w" sizes="(max-width: 1280px) 100vw, 1232px" width="2400" height="1134" alt="Overview of DeskForge: a scene specification configures the desktop, real applications are launched and explored, screenshots, accessibility trees and window stacks yield dense annotations, and annotated states and transitions form DeskForge-1M." fetchpriority="high">
+      </div>
+      <figcaption class="wrap" style="padding:0"><b>Overview of DeskForge and DeskForge-1M.</b> (a) A scene specification configures the desktop. (b) Real applications are launched and explored. (c) Screenshots, accessibility trees, and window stacks yield dense annotations. (d) Annotated states and transitions form DeskForge-1M.</figcaption>
+    </figure>
+  </div>
+  <div class="wrap">
+    <div class="tldr reveal">
+      <b>TL;DR</b>
+      <p>Instead of recording desktops, DeskForge <em>generates</em> them: it composes real applications into controlled multi-window scenes, annotates every visible element, and records the outcome of every click. Fine-tuning on the resulting corpus improves GUI grounding on held-out conditions and five external benchmarks, and raises long-horizon task completion under a fixed planner.</p>
+    </div>
+    <div class="stats reveal" aria-label="DeskForge-1M at a glance">
+      <div class="stat"><div class="v">1.21M</div><div class="l">annotated desktop observations</div></div>
+      <div class="stat"><div class="v">159.7M</div><div class="l">element instances</div></div>
+      <div class="stat"><div class="v">917K</div><div class="l">recorded click transitions</div></div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<section id="abstract" class="abstract">
+  <div class="wrap prose reveal">
+    <div class="kicker">Abstract</div>
+    <p>Computer-use agents need to reliably ground action targets in complex desktop scenes, where multiple applications, overlapping windows, and visually similar controls compete for attention. Existing training data rarely pair such scenes with dense annotations or vary them in a controlled way. We introduce <strong>DeskForge</strong>, a controllable desktop environment that composes and explores real applications to generate large-scale supervision for computer-use agents. It varies application states, content, window layout, appearance, and resolution, and fuses screenshots, accessibility trees, and window geometry into dense element annotations while recording the outcome of each executed action. Using this environment, we construct <strong>DeskForge-1M</strong>, a corpus of 1.2M annotated desktop observations containing 159.7M element instances. We fine-tune four vision-language models on 200K grounding examples drawn from DeskForge-1M. All four improve across held-out desktop conditions and on all five external GUI grounding benchmarks; for Qwen3.5-4B, accuracy increases by 11.51 percentage points on ScreenSpot-Pro and 10.11 points on OSWorld-G. The gains also translate to long-horizon task completion: under a fixed planner, the fine-tuned action models solve more WebArena-Infinity and OpenApps tasks, with Qwen3.5-4B increasing from 31 to 50 of 119 tasks and from 3 to 15 of 100 tasks, respectively. These results show that controllable composition of real desktop environments provides a scalable source of supervision for improving both GUI grounding and long-horizon computer use. We will release the framework, dataset, and trained models.</p>
+  </div>
+</section>
+
+<section id="demo">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="kicker">Demo</div>
+      <h2>Long-horizon tasks, with and without DeskForge</h2>
+      <p class="lead">In every episode the same planner (Qwen3.6-27B) writes each step's instruction; only the action model that grounds it on screen differs. Left: the base model. Right: the same model fine-tuned on DeskForge-1M.</p>
+    </div>
+  </div>
+  <div class="wrap-wide reveal">
+    <div class="video-card">
+      <video id="demo-video" controls muted playsinline preload="metadata" poster="assets/video/poster-1920.webp" width="1920" height="1080" aria-label="Long-horizon task demo: base versus fine-tuned action models">
+        <source src="assets/video/long_horizon.mp4" type="video/mp4">
+      </video>
+    </div>
+    <div class="video-bar">
+      <div class="chapters" aria-label="Chapters">
+        <button class="chip" type="button" data-t="0"><span class="n">0:00</span>Overview</button>
+        <button class="chip" type="button" data-t="7"><span class="n">0:07</span>GitLab issue · InternVL3.5-8B</button>
+        <button class="chip" type="button" data-t="57"><span class="n">0:57</span>Figma text layer · Gemma4-E4B</button>
+        <button class="chip" type="button" data-t="100.5"><span class="n">1:40</span>OpenApps todo + message · InternVL3.5-8B</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================== 01 Framework -->
+<section id="framework" class="chapter">
+  <div class="wrap">
+    <header class="chapter-head reveal">
+      <div class="chapter-no">01 · Framework</div>
+      <h2>The DeskForge Environment</h2>
+      <p class="lead">DeskForge generates the desktop rather than recording it. Real applications run in isolated Linux sessions, composed into configurable multi-window scenes; every screen is captured with its interface structure and window layout, and every executed action with its outcome.</p>
+      <nav class="jump" aria-label="Framework sections">
+        <a href="#composition">Scene composition</a><a href="#appearance">Appearance</a><a href="#annotations">Dense annotations</a><a href="#screentag">ScreenTag</a><a href="#interaction">Interaction recording</a>
+      </nav>
+    </header>
+
+    <div class="sub" id="composition">
+      <h3 class="reveal">Controllable scene composition</h3>
+      <p class="prose sub-lead reveal">A scene specification selects the applications and their initial states, stages their content, and sets window layout, appearance, and display resolution. The same application thus appears in many contexts, next to competing controls and partially overlapping windows.</p>
+      <div class="grid3 reveal">
+        <div class="feature"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7.5" height="7.5" rx="1.6"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.6"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.6"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.6"/></svg></div><h4>Applications and states</h4><p>Browsers, editors, file managers, and desktop utilities, launched with scripted initial states.</p></div>
+        <div class="feature"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 5h14M5 9.5h14M5 14h9M5 18.5h6"/></svg></div><h4>Content</h4><p>Staged documents, projects, and data, so each interface shows different information from scene to scene.</p></div>
+        <div class="feature"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2.8" y="3.5" width="12" height="9.5" rx="1.6"/><rect x="9.2" y="10.5" width="12" height="9.5" rx="1.6" fill="var(--accent-soft)"/></svg></div><h4>Layout and stacking</h4><p>Multi-window arrangements with similar labels, competing controls, and overlapping windows.</p></div>
+        <div class="feature"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5a8.5 8.5 0 0 0 0 17z" fill="currentColor"/></svg></div><h4>Appearance</h4><p>Diverse themes, icon sets, and window decorations, from classic Linux to Windows- and macOS-inspired styles.</p></div>
+        <div class="feature"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="2.8" y="4" width="18.4" height="12.5" rx="1.8"/><path d="M8.5 20.5h7M12 16.5v4"/></svg></div><h4>Resolution</h4><p>Display sizes from laptop screens to 4K monitors.</p></div>
+        <div class="feature"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="m5 3.5 13 6.8-5.6 1.6-2.4 5.5z"/><path d="m13 13 5.5 5.5"/></svg></div><h4>Exploration</h4><p>Clicks on actionable elements inside their visible regions, recording what each one changes.</p></div>
+      </div>
+    </div>
+
+    <div class="sub" id="appearance">
+      <h3 class="reveal">Appearance presets</h3>
+      <p class="prose sub-lead reveal">Community themes, icon sets, and window decorations are combined with configurable panels, docks, and backgrounds, so presets change how widgets and windows look, not only the wallpaper. All presets share the same Linux backend.</p>
+      <div class="reveal">
+        <div class="tabs" id="preset-tabs">
+          <button type="button" aria-selected="true" data-cap="Ubuntu-like">Ubuntu-like</button>
+          <button type="button" data-cap="Windows Redmond">Windows Redmond</button>
+          <button type="button" data-cap="macOS Tahoe-like">macOS Tahoe-like</button>
+          <button type="button" data-cap="Quartz Night">Quartz Night</button>
+        </div>
+        <figure>
+          <div class="fig">
+            <div class="preset-stage zoomable" id="preset-stage">
+              <img class="on" src="assets/img/presets/ubuntu_like-960.webp" srcset="assets/img/presets/ubuntu_like-960.webp 960w, assets/img/presets/ubuntu_like-1920.webp 1920w" sizes="(max-width: 1100px) 100vw, 1032px" alt="Desktop captured with the Ubuntu-like preset">
+              <img loading="lazy" src="assets/img/presets/windows_redmond-960.webp" srcset="assets/img/presets/windows_redmond-960.webp 960w, assets/img/presets/windows_redmond-1920.webp 1920w" sizes="(max-width: 1100px) 100vw, 1032px" alt="Desktop captured with the Windows Redmond preset">
+              <img loading="lazy" src="assets/img/presets/macos_tahoe_like-960.webp" srcset="assets/img/presets/macos_tahoe_like-960.webp 960w, assets/img/presets/macos_tahoe_like-1920.webp 1920w" sizes="(max-width: 1100px) 100vw, 1032px" alt="Desktop captured with the macOS Tahoe-like preset">
+              <img loading="lazy" src="assets/img/presets/quartz_night-960.webp" srcset="assets/img/presets/quartz_night-960.webp 960w, assets/img/presets/quartz_night-1920.webp 1920w" sizes="(max-width: 1100px) 100vw, 1032px" alt="Desktop captured with the Quartz Night preset">
+            </div>
+          </div>
+          <figcaption><b id="preset-cap">Ubuntu-like</b> preset, captured with DeskForge.</figcaption>
+        </figure>
+      </div>
+      <figure class="reveal" style="margin-top:28px">
+        <div class="fig zoomable" data-full="assets/img/gallery-2400.webp">
+          <img loading="lazy" src="assets/img/gallery-1200.webp" srcset="assets/img/gallery-1200.webp 1200w, assets/img/gallery-2400.webp 2400w" sizes="(max-width: 1100px) 100vw, 1032px" width="2400" height="1366" alt="A 5 by 5 gallery of DeskForge-1M observations across appearance presets and resolutions">
+        </div>
+        <figcaption><b>DeskForge-1M observations</b> across appearance presets and display resolutions.</figcaption>
+      </figure>
+    </div>
+
+    <div class="sub" id="annotations">
+      <h3 class="reveal">Dense structured annotations</h3>
+      <p class="prose sub-lead reveal">The annotation pipeline reconciles accessibility trees, screenshots, and measured window geometry. Every visible element, not only the action target, gets its type, text, geometry, and interaction properties, together with its hierarchy, reading order, and owning application and window.</p>
+      <div class="reveal">
+        <div class="toolbar" style="margin-bottom:14px">
+          <div class="tabs" id="sample-tabs">
+            <button type="button" aria-selected="true">Scene 1</button><button type="button">Scene 2</button><button type="button">Scene 3</button><button type="button">Scene 4</button><button type="button">Scene 5</button>
+          </div>
+          <span class="zoom-hint">Drag the slider to compare</span>
+        </div>
+        <figure class="fig">
+          <div class="compare" id="sample-compare">
+            <img src="assets/img/samples/0_annot-960.webp" srcset="assets/img/samples/0_annot-960.webp 960w, assets/img/samples/0_annot-1920.webp 1920w" sizes="(max-width: 1100px) 100vw, 1032px" alt="The same screenshot with its dense element annotations">
+            <div class="top"><img src="assets/img/samples/0_clean-960.webp" srcset="assets/img/samples/0_clean-960.webp 960w, assets/img/samples/0_clean-1920.webp 1920w" sizes="(max-width: 1100px) 100vw, 1032px" alt="Captured desktop screenshot"></div>
+            <div class="handle"><div class="knob"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 7-5 5 5 5M15 7l5 5-5 5"/></svg></div></div>
+            <span class="lab l">Screenshot</span><span class="lab r">Annotations</span>
+            <input type="range" min="0" max="100" value="50" aria-label="Reveal annotations">
+          </div>
+          <div class="compare-meta"><span><b>Applications:</b> <span id="sample-apps">Bluefish, File Roller, Mousepad</span></span><span id="sample-n">79 annotated elements</span></div>
+        </figure>
+      </div>
+
+      <div class="grid2 reveal" style="margin-top:36px; align-items:center">
+        <div>
+          <h4 class="h4">Visibility under occlusion</h4>
+          <div class="prose">
+            <p>Accessibility trees alone do not say what is actually on screen. DeskForge clips each element against its containers, the viewport, overlapping windows, and transient overlays, and keeps a partly covered control's exposed region as a union of rectangles rather than its full box.</p>
+            <p>Displayed text is verified at the pixel level, separately from accessibility names. A human audit finds <strong>99.8%</strong> of sampled element annotations correct.</p>
+          </div>
+        </div>
+        <figure>
+          <div class="fig white zoomable" data-full="assets/img/annotation_zoom-2000.webp">
+            <img loading="lazy" src="assets/img/annotation_zoom-1000.webp" srcset="assets/img/annotation_zoom-1000.webp 1000w, assets/img/annotation_zoom-2000.webp 2000w" sizes="(max-width: 860px) 100vw, 520px" alt="Zoomed detail of an annotated region">
+          </div>
+          <figcaption><b>Zoomed detail</b> of an annotated region.</figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <div class="sub" id="screentag">
+      <h3 class="reveal">ScreenTag serialization</h3>
+      <p class="prose sub-lead reveal">The visible annotations are serialized as ScreenTag, the compact markup introduced by <a href="https://github.com/Saidgurbuz/screenparse">ScreenParse</a>. It preserves the element hierarchy, keeps exposed regions as visible fragments, and marks text hidden behind other windows.</p>
+      <div class="grid2 reveal" style="align-items:start">
+        <figure>
+          <div class="fig white zoomable" data-full="assets/img/screentag_crop-1600.webp">
+            <img loading="lazy" src="assets/img/screentag_crop-800.webp" srcset="assets/img/screentag_crop-800.webp 800w, assets/img/screentag_crop-1600.webp 1600w" sizes="(max-width: 860px) 100vw, 520px" alt="A search dialog partly covering a notebook page">
+          </div>
+          <figcaption>A search dialog partly covers a notebook page.</figcaption>
+        </figure>
+        <div>
+<pre class="code" aria-label="ScreenTag serialization excerpt"><span class="t">&lt;screentag&gt;</span>
+  <span class="t">&lt;window&gt;</span><span class="lc">&lt;loc_209&gt;&lt;loc_156&gt;&lt;loc_444&gt;&lt;loc_439&gt;</span>
+    <span class="t">&lt;title&gt;</span>Home - Project Notes<span class="t">&lt;/title&gt;</span>
+    <span class="lc">…</span>
+    <span class="t">&lt;text_input&gt;</span><span class="lc">&lt;loc_228&gt;&lt;loc_225&gt;&lt;loc_442&gt;&lt;loc_419&gt;</span>
+      <span class="f">&lt;fragment&gt;</span><span class="lc">&lt;loc_228&gt;&lt;loc_225&gt;&lt;loc_442&gt;&lt;loc_228&gt;</span><span class="f">&lt;/fragment&gt;</span>
+      <span class="f">&lt;fragment&gt;</span><span class="lc">&lt;loc_228&gt;&lt;loc_228&gt;&lt;loc_275&gt;&lt;loc_383&gt;</span><span class="f">&lt;/fragment&gt;</span>
+      <span class="f">&lt;fragment&gt;</span><span class="lc">&lt;loc_381&gt;&lt;loc_228&gt;&lt;loc_442&gt;&lt;loc_383&gt;</span><span class="f">&lt;/fragment&gt;</span>
+      <span class="f">&lt;fragment&gt;</span><span class="lc">&lt;loc_228&gt;&lt;loc_383&gt;&lt;loc_442&gt;&lt;loc_419&gt;</span><span class="f">&lt;/fragment&gt;</span>
+      Project Note<span class="o">&lt;occluded/&gt;</span>
+      Created Tuesday 05 May <span class="o">&lt;occluded/&gt;</span>
+      This notebook contains a <span class="o">&lt;occluded/&gt;</span>ns.
+      Action Items
+      • Review Thunderbird an<span class="o">&lt;occluded/&gt;</span>
+      • Validate chat-style appl<span class="o">&lt;occluded/&gt;</span>
+      <span class="lc">…</span>
+    <span class="t">&lt;/text_input&gt;</span>
+    <span class="lc">…</span>
+  <span class="t">&lt;/window&gt;</span>
+  <span class="t">&lt;window&gt;</span><span class="lc">&lt;loc_275&gt;&lt;loc_228&gt;&lt;loc_381&gt;&lt;loc_383&gt;</span>
+    <span class="t">&lt;title&gt;</span>Search<span class="t">&lt;/title&gt;</span>
+    <span class="t">&lt;text&gt;</span><span class="lc">&lt;loc_279&gt;&lt;loc_248&gt;&lt;loc_293&gt;&lt;loc_261&gt;</span>Search:<span class="t">&lt;/text&gt;</span>
+    <span class="t">&lt;button&gt;</span><span class="lc">&lt;loc_363&gt;&lt;loc_248&gt;&lt;loc_376&gt;&lt;loc_261&gt;</span>Find<span class="t">&lt;/button&gt;</span>
+    <span class="lc">…</span>
+  <span class="t">&lt;/window&gt;</span>
+<span class="t">&lt;/screentag&gt;</span></pre>
+          <div class="legend-inline"><span class="t">element tags</span><span class="f">visible fragments</span><span class="o">occluded text</span><span class="lc">location tokens</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sub" id="interaction">
+      <h3 class="reveal">Interaction recording and instructions</h3>
+      <p class="prose sub-lead reveal">Each executed click links the screen before and after it, (S<sub>t</sub>, a<sub>t</sub>, S<sub>t+1</sub>), with the target and what changed. A vision-language model turns each transition into a natural single-step instruction, which becomes grounding supervision.</p>
+      <div class="reveal">
+        <div class="tabs" id="tr-tabs">
+          <button type="button" aria-selected="true">VS Code</button><button type="button">HomeBank</button><button type="button">Chromium</button>
+        </div>
+        <figure class="fig" id="transition">
+          <div class="tr-head">
+            <div><div class="lbl">Generated instruction</div><div class="instr" id="tr-instr"></div></div>
+            <div class="tr-act"><div class="lbl">Recorded action a<sub>t</sub></div><div class="act" id="tr-act"></div></div>
+          </div>
+          <div class="tr-shots">
+            <div class="shot zoomable"><img id="tr-before" src="assets/img/interaction/01_008_before-1920.webp" alt="Observation before the click" width="1920" height="1080"><div class="marker box" id="tr-box"></div><div class="marker pt" id="tr-pt"></div><span class="tag">Before · S<sub>t</sub></span></div>
+            <div class="shot zoomable"><img id="tr-after" src="assets/img/interaction/01_008_after-1920.webp" alt="Observation after the click" width="1920" height="1080"><span class="tag">After · S<sub>t+1</sub></span></div>
+          </div>
+          <div class="compare-meta" id="tr-meta"></div>
+        </figure>
+        <p class="note" style="margin-top:10px">Green box: target element. Dot: executed click.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================== 02 Dataset -->
+<section id="dataset" class="chapter">
+  <div class="wrap">
+    <header class="chapter-head reveal">
+      <div class="chapter-no">02 · Dataset</div>
+      <h2>DeskForge-1M</h2>
+      <p class="lead">1.21M annotated desktop observations from about 324K composed scenes, spanning 19 applications, seven appearance presets, and seven display resolutions, with 159.7M element instances and 917K recorded click transitions.</p>
+      <nav class="jump" aria-label="Dataset sections">
+        <a href="#composition-stats">Corpus composition</a><a href="#splits">Evaluation splits</a><a href="#comparison">Comparison with GUI resources</a>
+      </nav>
+    </header>
+
+    <div class="sub" id="composition-stats">
+      <h3 class="reveal">Corpus composition</h3>
+      <p class="prose sub-lead reveal">Screens are dense and cluttered: they hold 132 annotated elements on average, 91% show at least two applications, and 98% contain covered elements.</p>
+      <div class="chart-card reveal">
+        <div class="comp-grid">
+          <div class="comp-panel">
+            <div class="comp-title">Density</div>
+            <div class="comp-sub">Annotated elements per screen</div>
+            <div class="chart" id="comp-density" data-label="Distribution of annotated elements per observation"></div>
+          </div>
+          <div class="comp-panel">
+            <div class="comp-title">Composition</div>
+            <div class="comp-sub">Application windows open</div>
+            <div class="chart" id="comp-windows" data-label="Distribution of open application windows per observation"></div>
+          </div>
+          <div class="comp-panel">
+            <div class="comp-title">Occlusion</div>
+            <div class="comp-sub">Screens with more than <i>x</i>% of elements occluded</div>
+            <div class="chart" id="comp-occlusion" data-label="Share of observations above each occlusion level"></div>
+          </div>
+        </div>
+        <div class="comp-foot">All 1.21M observations. Hover for exact values.</div>
+      </div>
+    </div>
+
+    <div class="sub" id="splits">
+      <h3 class="reveal">Evaluation splits</h3>
+      <p class="prose sub-lead reveal">Splits are made at the scene level. Four test conditions measure generalization to new scenes and to desktop configurations held out from training.</p>
+      <div class="splits reveal">
+        <div class="split"><div class="n">New Scenes</div><div class="d">Unseen scenes composed from represented desktop attributes.</div></div>
+        <div class="split"><div class="n">App</div><div class="d">Held-out applications: GNOME System Monitor, Pluma, and Xarchiver.</div></div>
+        <div class="split"><div class="n">Theme</div><div class="d">A held-out appearance preset, Quartz Night Nord.</div></div>
+        <div class="split"><div class="n">Resolution</div><div class="d">A held-out display resolution, 2880×1800.</div></div>
+      </div>
+    </div>
+
+    <div class="sub" id="comparison">
+      <h3 class="reveal">Comparison with GUI resources</h3>
+      <p class="prose sub-lead reveal">Among these resources, only DeskForge combines dense labels, multi-application scenes, a configurable environment, visibility geometry, and recorded transitions. Resource names link to their papers or project pages.</p>
+      <div class="table-wrap reveal">
+        <table class="cmp">
+          <thead>
+            <tr><th>Resource</th><th>Images</th><th>Elements</th><th>Dense<br>labels</th><th>Multi-app<br>scenes</th><th>Configurable<br>environment</th><th>Visibility<br>geometry</th><th>Recorded<br>transitions</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><a class="ref" href="https://proceedings.iclr.cc/paper_files/paper/2025/hash/4ca0e369689dadb25a5345ba9755ad6f-Abstract-Conference.html">UGround</a></td><td>1.3M</td><td>10M</td><td class="no">✕</td><td class="no">✕</td><td class="no">✕</td><td class="no">✕</td><td class="no">✕</td></tr>
+            <tr><td><a class="ref" href="https://icml.cc/virtual/2026/poster/66756">WinDeskGround</a></td><td>585<sup>†</sup></td><td>1,356<sup>‡</sup></td><td class="no">✕</td><td class="yes">✓</td><td class="no">✕</td><td class="yes">✓</td><td class="no">✕</td></tr>
+            <tr><td><a class="ref" href="https://huggingface.co/datasets/allenai/MolmoPoint-GUISyn">MolmoPoint-GUISyn</a></td><td>36K</td><td>2M</td><td class="yes">✓</td><td class="no">✕</td><td class="no">✕</td><td class="no">✕</td><td class="no">✕</td></tr>
+            <tr><td><a class="ref" href="https://papers.nips.cc/paper_files/paper/2025/hash/cc7ae529e945226b0d52ea4ac478c4f3-Abstract-Conference.html">AgentNet</a></td><td>421K</td><td>421K</td><td class="no">✕</td><td class="yes">✓</td><td class="no">✕</td><td class="no">✕</td><td class="yes">✓</td></tr>
+            <tr><td><a class="ref" href="https://proceedings.iclr.cc/paper_files/paper/2026/hash/0961fffb7adb81388b9b24ab6a3ff7ab-Abstract-Conference.html">GroundCUA</a></td><td>55.6K</td><td>3.56M</td><td class="yes">✓</td><td class="no">✕</td><td class="no">✕</td><td class="no">✕</td><td class="no">✕</td></tr>
+            <tr><td><a class="ref" href="https://github.com/Saidgurbuz/screenparse">ScreenParse</a></td><td>771K</td><td>21M</td><td class="yes">✓</td><td class="no">✕</td><td class="no">✕</td><td class="no">✕</td><td class="no">✕</td></tr>
+            <tr><td><a class="ref" href="https://openreview.net/pdf?id=n9PDaFNi8t">OS-Atlas</a></td><td>2.3M</td><td>13M</td><td class="no">✕</td><td class="yes">✓</td><td class="no">✕</td><td class="no">✕</td><td class="no">✕</td></tr>
+            <tr><td><a class="ref" href="https://proceedings.iclr.cc/paper_files/paper/2026/hash/666c1861d709bd84e20b6e0e02a2c223-Abstract-Conference.html">ScaleCUA</a></td><td>1.6M</td><td>17.1M</td><td class="yes">✓</td><td class="no">✕</td><td class="no">✕</td><td class="no">✕</td><td class="yes">✓</td></tr>
+            <tr class="ours"><td>DeskForge (ours)</td><td>1.21M</td><td>159.7M</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+          </tbody>
+        </table>
+        <div class="table-note"><sup>†</sup>Source window images. <sup>‡</sup>Target annotations.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================== 03 Results -->
+<section id="results" class="chapter">
+  <div class="wrap">
+    <header class="chapter-head reveal">
+      <div class="chapter-no">03 · Results</div>
+      <h2>Experiments</h2>
+      <p class="lead">We fine-tune four vision-language models, Qwen3.5-4B, Gemma4-E4B, InternVL3.5-8B, and the GUI-specialized UI&#8209;R1&#8209;3B, on 200K grounding examples from DeskForge-1M, and compare each with its base model.</p>
+      <nav class="jump" aria-label="Results sections">
+        <a href="#r-heldout">Held-out grounding</a><a href="#r-external">External benchmarks</a><a href="#r-longhorizon">Long-horizon tasks</a><a href="#r-detection">Element detection</a>
+      </nav>
+    </header>
+    <div class="results-kpis reveal">
+      <div class="kpi"><div class="v">76.26<small>→</small>87.54</div><div class="l">Qwen3.5-4B mean accuracy over the four held-out conditions (%)</div></div>
+      <div class="kpi"><div class="v">+11.51</div><div class="l">points for Qwen3.5-4B on ScreenSpot-Pro (+10.11 on OSWorld-G)</div></div>
+      <div class="kpi"><div class="v">31<small>→</small>50</div><div class="l">WebArena-Infinity tasks solved by Qwen3.5-4B under a fixed planner (of 119)</div></div>
+    </div>
+
+    <div class="sub" id="r-heldout">
+      <h3 class="reveal">Grounding under held-out desktop conditions</h3>
+      <p class="prose sub-lead reveal">All four models improve in every held-out condition, including unseen applications, themes, and resolutions. In mean accuracy, all four fine-tuned models surpass the strongest public checkpoint we evaluate.</p>
+      <div class="chart-card reveal">
+        <div class="chart-head">
+          <div class="tabs" id="ho-tabs" style="margin:0">
+            <button type="button">New Scenes</button><button type="button">Theme</button><button type="button">App</button><button type="button">Resolution</button><button type="button" aria-selected="true">Mean</button>
+          </div>
+          <div class="legend"><span><i class="sw base"></i>Base</span><span><i class="sw ft"></i>+ DeskForge-1M</span><span><i class="sw ref"></i>Best public checkpoint</span></div>
+        </div>
+        <div class="chart" id="ho-chart" data-label="Held-out grounding accuracy, base versus fine-tuned"></div>
+        <details class="more"><summary>Full table, including ten public checkpoints</summary><div id="ho-table"></div></details>
+      </div>
+      <div class="grid2 reveal" style="margin-top:28px; align-items:center">
+        <div class="prose">
+          <h4 class="h4">Largest gains where desktops are hardest</h4>
+          <p>As more applications share the screen, fine-tuned Qwen loses only a few points, while its base model and UI-Venus-2-9B, the strongest public reference, degrade steadily. The gap to the base grows from 9.7 to 14.3 points, and from 10.9 to 13.7 points as more of the target is covered.</p>
+        </div>
+        <figure>
+          <div class="fig white pad zoomable" data-full="assets/img/grounding_robustness-2200.webp">
+            <img loading="lazy" src="assets/img/grounding_robustness-1100.webp" srcset="assets/img/grounding_robustness-1100.webp 1100w, assets/img/grounding_robustness-2200.webp 2200w" sizes="(max-width: 860px) 100vw, 520px" width="2200" height="904" alt="Grounding accuracy by number of applications on screen and by target visible-area loss">
+          </div>
+          <figcaption><b>Accuracy by scene and target difficulty:</b> (A) applications on screen, (B) target visible-area loss.</figcaption>
+        </figure>
+      </div>
+      <details class="more reveal">
+        <summary>Examples: targets that public models miss</summary>
+        <div>
+          <p class="note">Green box: annotated target. Red markers: public-model clicks. Blue dot: fine-tuned Qwen3.5-4B.</p>
+          <img loading="lazy" src="assets/img/failures/gf_legend-1000.webp" srcset="assets/img/failures/gf_legend-1000.webp 1000w, assets/img/failures/gf_legend-2000.webp 2000w" alt="Legend for public model markers" style="background:#fff;border-radius:8px;margin-bottom:10px">
+          <div class="grid2">
+            <div class="fig white zoomable" data-full="assets/img/failures/gf_0-2000.webp"><img loading="lazy" src="assets/img/failures/gf_0-1000.webp" alt="Grounding failure example 1"></div>
+            <div class="fig white zoomable" data-full="assets/img/failures/gf_1-2000.webp"><img loading="lazy" src="assets/img/failures/gf_1-1000.webp" alt="Grounding failure example 2"></div>
+            <div class="fig white zoomable" data-full="assets/img/failures/gf_2-2000.webp"><img loading="lazy" src="assets/img/failures/gf_2-1000.webp" alt="Grounding failure example 3"></div>
+            <div class="fig white zoomable" data-full="assets/img/failures/gf_3-2000.webp"><img loading="lazy" src="assets/img/failures/gf_3-1000.webp" alt="Grounding failure example 4"></div>
+          </div>
+        </div>
+      </details>
+    </div>
+
+    <div class="sub" id="r-external">
+      <h3 class="reveal">Transfer to external GUI benchmarks</h3>
+      <p class="prose sub-lead reveal">On <a href="https://doi.org/10.1145/3746027.3755688">ScreenSpot-Pro</a>, <a href="https://openreview.net/pdf?id=n9PDaFNi8t">ScreenSpot-v2</a>, <a href="https://papers.nips.cc/paper_files/paper/2025/hash/22c868099177ee278eb7baccec649f35-Abstract-Datasets_and_Benchmarks_Track.html">OSWorld-G</a>, <a href="https://proceedings.mlr.press/v267/nayak25a.html">UI-Vision</a>, and <a href="https://openaccess.thecvf.com/content/CVPR2026/html/Wang_MMBench-GUI_A_Unified_Hierarchical_Evaluation_Framework_for_Multi-Platform_GUI_Agents_CVPR_2026_paper.html">MMBench-GUI</a>, human-annotated screens from Windows, macOS, Linux, mobile, and the web, all four models improve on all five benchmarks.</p>
+      <div class="chart-card reveal">
+        <div class="chart-head">
+          <div class="tabs" id="ext-tabs" style="margin:0">
+            <button type="button" aria-selected="true">ScreenSpot-Pro</button><button type="button">ScreenSpot-v2</button><button type="button">OSWorld-G</button><button type="button">UI-Vision</button><button type="button">MMBench-GUI</button><button type="button">Mean</button>
+          </div>
+          <div class="legend"><span><i class="sw base"></i>Base</span><span><i class="sw ft"></i>+ DeskForge-1M</span></div>
+        </div>
+        <div class="chart" id="ext-chart" data-label="External benchmark accuracy, base versus fine-tuned"></div>
+        <details class="more"><summary>Full table</summary><div id="ext-table"></div></details>
+      </div>
+      <p class="prose reveal" style="margin-top:18px; color:var(--ink-2)">Gemma's mean over the five benchmarks rises by 24.9 points. On ScreenSpot-v2, gains reach mobile and web screens as well, although DeskForge-1M contains no mobile data, and they extend to UI-R1, a model already specialized for GUI interaction.</p>
+    </div>
+
+    <div class="sub" id="r-longhorizon">
+      <h3 class="reveal">Long-horizon task completion</h3>
+      <p class="prose sub-lead reveal">A fixed Qwen3.6-27B planner decides what to do; the action model decides where to click. Swapping only the action model, we evaluate a 119-task <a href="https://github.com/web-arena-x/webarena-infinity">WebArena-Infinity</a> panel and the 100-task <a href="https://openreview.net/pdf?id=cj1MAx7lKs">OpenApps</a> longer-horizon set.</p>
+      <div class="chart-card reveal">
+        <div class="chart-head">
+          <div class="tabs" id="lh-tabs" style="margin:0">
+            <button type="button" aria-selected="true">WebArena-Infinity · 119 tasks</button><button type="button">OpenApps · 100 tasks</button>
+          </div>
+          <div class="legend"><span><i class="sw base"></i>Base</span><span><i class="sw ft"></i>+ DeskForge-1M</span></div>
+        </div>
+        <div class="chart" id="lh-chart" data-label="Tasks solved, base versus fine-tuned action model"></div>
+        <details class="more"><summary>Full table</summary><div id="lh-table"></div></details>
+      </div>
+      <p class="prose reveal" style="margin-top:18px; color:var(--ink-2)">Every fine-tuned action model solves more tasks in both environments, even though training uses single-step grounding examples and these are browser environments unlike our composed desktops. Better grounding alone raises task completion, with no planner training.</p>
+      <div class="reveal" style="margin-top:10px">
+        <div class="tabs" id="traj-tabs">
+          <button type="button" aria-selected="true" data-stem="t5_openapps_043" data-cap="OpenApps">OpenApps · task A</button>
+          <button type="button" data-stem="t5_openapps_015" data-cap="OpenApps">OpenApps · task B</button>
+          <button type="button" data-stem="t5_infinity_gitlab_h8" data-cap="WebArena-Infinity (GitLab)">WebArena-Infinity · GitLab</button>
+          <button type="button" data-stem="t5_infinity_figma_h8" data-cap="WebArena-Infinity (Figma)">WebArena-Infinity · Figma</button>
+        </div>
+        <figure>
+          <div class="fig white pad zoomable"><img id="traj-img" loading="lazy" src="assets/img/trajectories/t5_openapps_043-1100.webp" srcset="assets/img/trajectories/t5_openapps_043-1100.webp 1100w, assets/img/trajectories/t5_openapps_043-2200.webp 2200w" sizes="(max-width: 1100px) 100vw, 1000px" alt="OpenApps trajectory"></div>
+          <figcaption><b>Paired trajectories, <span id="traj-cap">OpenApps</span>.</b> Base run (top) and fine-tuned run (bottom) under the same planner; × and ○ mark their clicks.</figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <div class="sub" id="r-detection">
+      <h3 class="reveal">Dense element detection</h3>
+      <div class="grid2 reveal" style="align-items:center">
+        <p class="prose" style="color:var(--ink-2);margin:0">Dense annotations also teach models to parse the whole screen. An RT-DETRv4-L detector trained on DeskForge-1M transfers to out-of-domain <a href="https://proceedings.iclr.cc/paper_files/paper/2026/hash/0961fffb7adb81388b9b24ab6a3ff7ab-Abstract-Conference.html">GroundCUA</a> screens and outperforms the OmniParser v2 detector and ScreenParse YOLO11L on all three localization metrics.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Detector</th><th>Group F1</th><th>Center-hit F1</th><th>Mean best IoU</th></tr></thead>
+            <tbody>
+              <tr><td>OmniParser v2 detector</td><td>58.55</td><td>86.24</td><td>0.591</td></tr>
+              <tr><td>ScreenParse YOLO11L</td><td>57.59</td><td>85.90</td><td>0.585</td></tr>
+              <tr class="ours"><td>DeskForge RT-DETRv4-L</td><td>62.17</td><td>87.01</td><td>0.611</td></tr>
+            </tbody>
+          </table>
+          <div class="table-note">Element detection on GroundCUA. F1 in %; mean best IoU on a 0–1 scale.</div>
+        </div>
+      </div>
+      <div class="reveal" style="margin-top:22px">
+        <div class="toolbar" style="margin-bottom:12px">
+          <div class="tabs" id="det-tabs"><button type="button" aria-selected="true" data-k="blender">Blender</button><button type="button" data-k="shotcut">Shotcut</button><button type="button" data-k="obs">OBS Studio</button></div>
+          <span class="zoom-hint">Drag the slider to compare</span>
+        </div>
+        <figure class="fig">
+          <div class="compare" id="det-compare">
+            <img src="assets/img/detector/blender_pred-960.webp" srcset="assets/img/detector/blender_pred-960.webp 960w, assets/img/detector/blender_pred-1920.webp 1920w" sizes="(max-width: 1100px) 100vw, 1032px" alt="DeskForge RT-DETRv4-L detections">
+            <div class="top"><img src="assets/img/detector/blender_gt-960.webp" srcset="assets/img/detector/blender_gt-960.webp 960w, assets/img/detector/blender_gt-1920.webp 1920w" sizes="(max-width: 1100px) 100vw, 1032px" alt="GroundCUA human annotation"></div>
+            <div class="handle"><div class="knob"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 7-5 5 5 5M15 7l5 5-5 5"/></svg></div></div>
+            <span class="lab l">GroundCUA annotation</span><span class="lab r">DeskForge detector</span>
+            <input type="range" min="0" max="100" value="50" aria-label="Compare annotation and detections">
+          </div>
+        </figure>
+        <p class="note" style="margin-top:10px">Out-of-distribution professional software from GroundCUA: human annotation (left) and our detector's predictions (right).</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="citation">
+  <div class="wrap">
+    <div class="sec-head reveal" style="margin-bottom:16px">
+      <div class="kicker">Citation</div>
+      <h2>BibTeX</h2>
+    </div>
+    <div class="bib reveal">
+<pre class="code" id="bib-text">@article{gurbuz2026deskforge,
+  title   = {DeskForge: Dense Supervision from Desktop Environments
+             for Computer-Use Agents},
+  author  = {Gurbuz, A. Said and Nassar, Ahmed and Hong, Sunghwan and
+             Pollefeys, Marc and Staar, Peter W. J.},
+  journal = {arXiv preprint},
+  year    = {2026}
+}</pre>
+      <button class="copy" type="button" data-target="#bib-text">Copy</button>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 The DeskForge authors</span>
+    <span>ETH Zurich · IBM Research Zurich · Microsoft</span>
+  </div>
+</footer>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Enlarged image"><button class="x" type="button" aria-label="Close">×</button><img alt=""></div>
+
+<script src="assets/js/main.js" defer></script>
+</body>
+</html>

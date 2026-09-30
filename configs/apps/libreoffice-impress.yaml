@@ -1,0 +1,17 @@
+app_name: libreoffice-impress
+binary: soffice
+args:
+  - --impress
+  - --nologo
+  - --norestore
+  - --nofirststartwizard
+atspi_name: soffice
+window_titles:
+  - LibreOffice Impress
+  - Impress
+interactions:
+  - name: default
+    description: Default Impress window
+    actions:
+      - type: wait
+        value: "3.0"

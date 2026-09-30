@@ -1,0 +1,124 @@
+# Mousepad — lightweight text editor
+app_name: mousepad
+binary: mousepad
+atspi_name: mousepad
+args:
+  - ${DESKFORGE_ROOT}/assets/audit/sample_notes.md
+window_titles:
+  - meeting_notes.md - Mousepad
+  - Mousepad
+
+interactions:
+  - name: default
+    description: Open Mousepad with a deterministic note file
+    actions:
+      - type: wait
+        value: "2.0"
+
+  - name: audit_probe
+    description: Qualification probe with the File menu opened
+    actions:
+      - type: wait
+        value: "1.0"
+      - type: key
+        value: "alt+f"
+        delay: 1.0
+
+  - name: find_dialog
+    description: Open the search dialog
+    actions:
+      - type: key
+        value: "ctrl+f"
+        delay: 1.0
+
+  - name: file_menu
+    description: Open the File menu
+    actions:
+      - type: key
+        value: "alt+f"
+        delay: 1.0
+
+  - name: replace_dialog
+    description: Open the replace dialog
+    actions:
+      - type: wait
+        value: "1.0"
+      - type: key
+        value: "ctrl+h"
+        delay: 1.0
+
+  - name: goto_line
+    description: Open the Go to Line dialog
+    actions:
+      - type: wait
+        value: "1.0"
+      - type: key
+        value: "ctrl+l"
+        delay: 1.0
+
+  - name: preferences_dialog
+    description: Open the Preferences dialog from the Edit menu
+    actions:
+      - type: wait
+        value: "1.0"
+      - type: key
+        value: "alt+e"
+        delay: 0.5
+      - type: key
+        value: "p"
+        delay: 1.0
+
+  - name: context_menu
+    description: Open the editor context menu
+    actions:
+      - type: wait
+        value: "1.0"
+      - type: click
+        value: "920,340,3"
+        delay: 1.0
+
+chains:
+  - name: editor_progressive
+    description: Capture baseline editor, search dialog, then restore focus to the File menu
+    steps:
+      - name: baseline
+        actions:
+          - type: wait
+            value: "1.5"
+        capture: true
+      - name: search_dialog
+        actions:
+          - type: key
+            value: "ctrl+f"
+            delay: 1.0
+        capture: true
+      - name: file_menu
+        actions:
+          - type: key
+            value: "Escape"
+            delay: 0.4
+          - type: key
+            value: "alt+f"
+            delay: 1.0
+        capture: true
+
+  - name: editor_dialogs
+    description: Capture replace and go-to-line dialogs in one Mousepad session
+    steps:
+      - name: replace_dialog
+        actions:
+          - type: wait
+            value: "1.5"
+          - type: key
+            value: "ctrl+h"
+            delay: 1.0
+        capture: true
+      - name: goto_line
+        actions:
+          - type: key
+            value: "Escape"
+            delay: 0.4
+          - type: key
+            value: "ctrl+l"
+            delay: 1.0
+        capture: true

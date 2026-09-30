@@ -1,0 +1,24 @@
+# GNOME Terminal
+app_name: gnome-terminal
+binary: gnome-terminal
+atspi_name: gnome-terminal-server
+window_titles: ["Terminal", "GNOME Terminal", "gnome-terminal"]
+
+interactions:
+  - name: default
+    description: Terminal with deterministic typed commands for dense visible content
+    actions:
+      - type: wait
+        value: "1.5"
+      - type: type_text
+        value: "pwd\\nls -la\\npython3 --version\\n"
+        delay: 1.0
+
+  - name: menu_open
+    description: Open the app menu or menubar
+    actions:
+      - type: wait
+        value: "1.0"
+      - type: key
+        value: "F10"
+        delay: 1.0

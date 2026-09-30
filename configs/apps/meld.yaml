@@ -1,0 +1,26 @@
+# Meld — diff/merge tool
+app_name: meld
+binary: meld
+atspi_name: meld
+args:
+  - ${DESKFORGE_ROOT}/assets/audit/meld_left.txt
+  - ${DESKFORGE_ROOT}/assets/audit/meld_right.txt
+window_titles:
+  - config_v1.txt
+  - Meld
+
+interactions:
+  - name: default
+    description: Open Meld with a deterministic two-file diff
+    actions:
+      - type: wait
+        value: "2.0"
+
+  - name: audit_probe
+    description: Qualification probe with the File menu opened
+    actions:
+      - type: wait
+        value: "1.0"
+      - type: key
+        value: "alt+f"
+        delay: 1.0

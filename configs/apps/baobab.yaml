@@ -1,0 +1,23 @@
+# GNOME Disk Usage Analyzer
+app_name: baobab
+binary: baobab
+atspi_name: baobab
+args:
+  - "{home}"
+window_titles: ["Disk Usage Analyzer", "Baobab", "baobab"]
+
+interactions:
+  - name: default
+    description: Open Disk Usage Analyzer on the project directory
+    actions:
+      - type: wait
+        value: "4.0"
+
+  - name: heuristic_click
+    description: Heuristically activate one visible control to expose a second state
+    actions:
+      - type: wait
+        value: "1.5"
+      - type: heuristic_click
+        value: "random|6"
+        delay: 1.2

@@ -1,0 +1,32 @@
+# Pluma — MATE text editor
+app_name: pluma
+binary: pluma
+atspi_name: pluma
+args:
+  - ${DESKFORGE_ROOT}/assets/audit/sample_notes.md
+window_titles:
+  - meeting_notes.md - Pluma
+  - Pluma
+
+interactions:
+  - name: default
+    description: Open Pluma with a deterministic note file
+    actions:
+      - type: wait
+        value: "2.0"
+
+  - name: audit_probe
+    description: Qualification probe with the File menu opened
+    actions:
+      - type: wait
+        value: "1.0"
+      - type: key
+        value: "alt+f"
+        delay: 1.0
+
+  - name: find_dialog
+    description: Open the search dialog
+    actions:
+      - type: key
+        value: "ctrl+f"
+        delay: 1.0

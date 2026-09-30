@@ -1,0 +1,235 @@
+/* Dark chrome around bright screenshots: the capture should be the only thing
+   on the page that is light, otherwise every box reads as low contrast. */
+:root {
+  --bg: #14171c;
+  --bg-2: #1b1f26;
+  --bg-3: #232935;
+  --line: #2f3846;
+  --fg: #d8dee9;
+  --dim: #8b95a5;
+  --accent: #61b3ff;
+  --ok: #6fcf7f;
+  --warn: #e6b455;
+  --bad: #e07a7a;
+  --added: #b48ce0;
+  --row: 26px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0; height: 100%;
+  background: var(--bg); color: var(--fg);
+  font: 13px/1.45 -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  overflow: hidden;
+}
+
+#app {
+  display: grid;
+  grid-template-columns: 300px 1fr 340px;
+  grid-template-rows: 40px 1fr;
+  grid-template-areas: "top top top" "side viewer panel";
+  height: 100%;
+}
+
+/* ---------------------------------------------------------------- topbar */
+
+#topbar {
+  grid-area: top;
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 10px;
+  background: var(--bg-2);
+  border-bottom: 1px solid var(--line);
+}
+.brand { font-weight: 600; letter-spacing: .2px; white-space: nowrap; }
+#run-label { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11px;
+  max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dim { color: var(--dim); }
+.grow { flex: 1; }
+.sep { width: 1px; height: 20px; background: var(--line); }
+.hidden { display: none !important; }
+
+button, select, input[type=search], input[type=text], input[type=number], textarea {
+  background: var(--bg-3); color: var(--fg);
+  border: 1px solid var(--line); border-radius: 4px;
+  padding: 3px 7px; font: inherit;
+}
+button { cursor: pointer; }
+button:hover:not(:disabled) { border-color: var(--accent); }
+button:disabled { opacity: .45; cursor: default; }
+button.primary { background: #2d4b6b; border-color: #3d6a97; }
+button.danger:hover { border-color: var(--bad); color: var(--bad); }
+select { max-width: 220px; }
+.toggle { display: inline-flex; align-items: center; gap: 4px; color: var(--dim); cursor: pointer; }
+#status.busy { color: var(--accent); }
+#status.error { color: var(--bad); }
+#status.saved { color: var(--ok); }
+
+/* --------------------------------------------------------------- sidebar */
+
+#sidebar {
+  grid-area: side;
+  border-right: 1px solid var(--line);
+  display: flex; flex-direction: column; min-height: 0;
+  background: var(--bg-2);
+}
+.side-head { display: flex; gap: 4px; padding: 6px; border-bottom: 1px solid var(--line); }
+.side-head input { flex: 1; min-width: 0; }
+.side-head select { max-width: 96px; }
+.side-head button { padding: 3px 6px; font-size: 11px; }
+#tree { flex: 1; overflow-y: auto; overflow-x: hidden; }
+#sidebar-foot { padding: 5px 8px; border-top: 1px solid var(--line); font-size: 11px; }
+
+/* One row per folder, indented by depth. Sample rows are the leaves and are
+   the only ones carrying an image, so the tree costs nothing until a run is
+   actually opened. */
+.tnode {
+  display: flex; align-items: center; gap: 4px; padding: 2px 6px 2px 4px;
+  cursor: pointer; white-space: nowrap; font-size: 12px;
+}
+.tnode:hover { background: var(--bg-3); }
+.tnode.current { background: var(--bg-3); box-shadow: inset 2px 0 0 var(--accent); }
+.tnode .twisty { width: 10px; color: var(--dim); font-size: 9px; }
+.tnode .tname { overflow: hidden; text-overflow: ellipsis; }
+.tnode .tcount { font-size: 10.5px; }
+
+.sample {
+  display: flex; gap: 8px; padding: 6px; cursor: pointer;
+  border-bottom: 1px solid var(--line); border-left: 3px solid transparent;
+}
+.sample:hover { background: var(--bg-3); }
+.sample.active { background: var(--bg-3); border-left-color: var(--accent); }
+.sample img { width: 92px; height: 52px; object-fit: cover; background: #000; border-radius: 2px; }
+.sample .meta { min-width: 0; flex: 1; font-size: 11px; }
+.sample .name { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 10.5px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.badge {
+  display: inline-block; padding: 0 5px; border-radius: 8px; font-size: 10px;
+  border: 1px solid var(--line); color: var(--dim);
+}
+.badge.verified { color: var(--ok); border-color: var(--ok); }
+.badge.needs_work { color: var(--warn); border-color: var(--warn); }
+.badge.rejected { color: var(--bad); border-color: var(--bad); }
+.badge.edits { color: var(--added); border-color: var(--added); }
+
+/* ---------------------------------------------------------------- viewer */
+
+#viewer { grid-area: viewer; position: relative; overflow: hidden; background: #0d0f13; }
+#stage-wrap { position: absolute; inset: 0; overflow: hidden; cursor: grab; }
+#stage-wrap.panning { cursor: grabbing; }
+#stage-wrap.drawing { cursor: crosshair; }
+#stage { position: absolute; transform-origin: 0 0; will-change: transform; }
+#base-image, #detail-image { position: absolute; left: 0; top: 0; image-rendering: pixelated; }
+#detail-image { display: none; }
+#boxes, #draft { position: absolute; left: 0; top: 0; }
+.empty { position: absolute; inset: 0; display: grid; place-items: center; color: var(--dim); }
+#hover-readout {
+  position: absolute; left: 8px; bottom: 6px; font-size: 11px;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  background: rgba(12,14,18,.8); padding: 2px 6px; border-radius: 3px; pointer-events: none;
+}
+
+/* Box borders and labels are inside a scaled container, so their thickness is
+   divided back out through --bw / --fs, which JS keeps in step with the zoom. */
+.box {
+  position: absolute; pointer-events: none;
+  border: var(--bw, 1px) solid var(--box, #61b3ff);
+  background: transparent;
+}
+.box.dimmed { opacity: .22; }
+.box.occluded { border-style: dashed; }
+.box.modified { --box: #e6b455; }
+.box.added { --box: #b48ce0; }
+.box.deleted { --box: #e07a7a; opacity: .5; }
+.box.selected { border-width: calc(var(--bw, 1px) * 2); background: rgba(97,179,255,.14); }
+/* Hovering a ScreenTag block flashes its box without taking the selection:
+   reading down the markup should show where each block lands, not repeatedly
+   replace what is open in the element panel. */
+.box.peek { --box: #e6b455; border-width: calc(var(--bw, 1px) * 2);
+            background: rgba(230,180,85,.16); }
+.box .lab {
+  position: absolute; left: 0; top: 0; transform: translateY(-100%);
+  font: var(--fs, 11px)/1.25 ui-monospace, Menlo, Consolas, monospace;
+  background: var(--box, #61b3ff); color: #0d0f13;
+  padding: 0 calc(var(--bw, 1px) * 2); white-space: nowrap;
+}
+.handle {
+  position: absolute; width: var(--hs, 8px); height: var(--hs, 8px);
+  background: #fff; border: var(--bw,1px) solid #000; pointer-events: auto;
+}
+#draft .box { border-style: dashed; --box: #b48ce0; }
+
+/* ----------------------------------------------------------------- panel */
+
+#panel {
+  grid-area: panel; border-left: 1px solid var(--line); background: var(--bg-2);
+  display: flex; flex-direction: column; min-height: 0;
+}
+.tabs { display: flex; border-bottom: 1px solid var(--line); }
+.tabs button {
+  flex: 1; border: 0; border-radius: 0; background: transparent; color: var(--dim);
+  padding: 7px 2px; border-bottom: 2px solid transparent; font-size: 12px;
+}
+.tabs button.active { color: var(--fg); border-bottom-color: var(--accent); }
+.tab { display: none; overflow-y: auto; padding: 8px 10px; flex: 1; min-height: 0; }
+.tab.active { display: block; }
+
+h4 { margin: 12px 0 6px; font-size: 11px; text-transform: uppercase;
+     letter-spacing: .6px; color: var(--dim); }
+h4:first-child { margin-top: 0; }
+
+.kv { display: grid; grid-template-columns: 96px 1fr; gap: 2px 8px; font-size: 12px; }
+.kv > div:nth-child(odd) { color: var(--dim); }
+.kv > div:nth-child(even) { word-break: break-word;
+  font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11.5px; }
+
+.field { margin-bottom: 6px; }
+.field label { display: block; color: var(--dim); font-size: 11px; margin-bottom: 2px; }
+.field input, .field select, .field textarea { width: 100%; }
+.rect-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+.row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+
+.bars { display: grid; grid-template-columns: 1fr auto; gap: 1px 6px; align-items: center; }
+.bar-name { position: relative; padding: 1px 4px; cursor: pointer;
+  font-size: 11.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar-name span { position: relative; }
+.bar-name::before {
+  content: ""; position: absolute; left: 0; top: 0; bottom: 0;
+  width: var(--pct, 0%); background: #2d4b6b; border-radius: 2px;
+}
+.bar-name.picked { outline: 1px solid var(--accent); }
+.bar-count { font-size: 11px; color: var(--dim); text-align: right; }
+
+pre { white-space: pre-wrap; word-break: break-word; font-size: 11px;
+      background: var(--bg-3); padding: 6px; border-radius: 4px; max-height: 320px;
+      overflow: auto; margin: 4px 0; }
+details summary { cursor: pointer; color: var(--dim); font-size: 11px; }
+.note { border-left: 2px solid var(--warn); padding: 4px 8px; margin: 6px 0;
+        background: rgba(230,180,85,.08); font-size: 11.5px; }
+.note.bad { border-color: var(--bad); background: rgba(224,122,122,.08); }
+.chip { display: inline-block; padding: 0 6px; border: 1px solid var(--line);
+        border-radius: 10px; font-size: 11px; margin: 0 3px 3px 0; }
+/* ------------------------------------------------------------- screentag */
+
+/* The tag is read block by block, so the block under the cursor has to be
+   findable at a glance in a 13KB single-line string. Nesting is real - a window
+   contains its children - so the highlight is on the innermost block only, and
+   the outer ones stay quiet. */
+pre.tagcode { max-height: 46vh; line-height: 1.55; font-size: 11px; outline: none; }
+pre.tagcode:focus { box-shadow: inset 0 0 0 1px var(--accent); }
+pre.tagblock { max-height: 140px; background: var(--bg-2);
+               box-shadow: inset 0 0 0 1px var(--line); }
+/* Hover is a class rather than `:hover` because `:hover` matches every
+   ancestor: pointing at a button inside a window would light up the window too,
+   which is the opposite of "one block at a time". */
+.tgb { border-radius: 2px; }
+.tgb.hovered { background: rgba(230,180,85,.14); }
+.tgb.active { background: rgba(97,179,255,.20); box-shadow: 0 0 0 1px var(--accent); }
+.tgb.active > .tghead, .tgb.active > .tgclose { color: var(--accent); }
+.tgb.orphan > .tghead { text-decoration: line-through; color: var(--bad); }
+.tghead, .tgclose { color: var(--dim); }
+.tgtext { color: var(--fg); }
+
+table.flag { width: 100%; border-collapse: collapse; font-size: 11px; }
+table.flag td { border-top: 1px solid var(--line); padding: 3px 2px; vertical-align: top; }
+table.flag td.act { width: 34px; text-align: right; }

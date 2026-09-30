@@ -1,0 +1,70 @@
+# Firefox PDF.js reader probe
+app_name: firefox-pdf
+binary: firefox-bin
+atspi_name: firefox
+document_path: ${DESKFORGE_ROOT}/assets/audit/sample_report.pdf
+document_semantics: ${DESKFORGE_ROOT}/assets/audit/sample_report.structure.json
+window_titles:
+  - quarterly_report.pdf - Mozilla Firefox
+  - Mozilla Firefox
+args:
+  - --no-remote
+  - --profile
+  - /tmp/session_firefox_pdf_profile
+  - --new-window
+  - file://${DESKFORGE_ROOT}/assets/audit/sample_report.pdf
+env:
+  MOZ_ENABLE_WAYLAND: "0"
+  MOZ_DBUS_REMOTE: "1"
+  MOZ_ALLOW_DOWNGRADE: "1"
+  MOZ_ACCESSIBILITY_FORCE_DISABLED: "0"
+  GNOME_ACCESSIBILITY: "1"
+  ACCESSIBILITY_ENABLED: "1"
+  MOZILLA_FIVE_HOME: "${DESKFORGE_ROOT}/tools/extracted/usr/lib64/firefox"
+
+interactions:
+  - name: default
+    description: Open local sample PDF in Firefox PDF.js
+    actions:
+      - type: wait
+        value: "4.0"
+
+  - name: page_down
+    description: Scroll deeper into the PDF document
+    actions:
+      - type: wait
+        value: "3.0"
+      - type: key
+        value: "Page_Down"
+        delay: 1.0
+
+  - name: find_bar
+    description: Open the PDF find bar
+    actions:
+      - type: wait
+        value: "3.0"
+      - type: key
+        value: "ctrl+f"
+        delay: 1.0
+
+chains:
+  - name: pdf_progressive
+    description: Capture page 1, then page 2, then the find bar
+    steps:
+      - name: page1
+        actions:
+          - type: wait
+            value: "4.0"
+        capture: true
+      - name: page2
+        actions:
+          - type: key
+            value: "Page_Down"
+            delay: 1.0
+        capture: true
+      - name: find_bar
+        actions:
+          - type: key
+            value: "ctrl+f"
+            delay: 1.0
+        capture: true

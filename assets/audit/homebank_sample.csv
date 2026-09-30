@@ -1,0 +1,11 @@
+date;payment;info;payee;memo;amount;category;tags
+2026-04-01;Transfer;Checking;Acme Payroll;April salary;5200.00;Income:Salary;work
+2026-04-02;Card;Checking;Metro Transit;Monthly commuter pass;-128.00;Transport:Transit;commute
+2026-04-03;Card;Checking;Cloud Office Suite;Team subscription;-49.00;Work:Software;ops
+2026-04-04;Card;Checking;Northwind Market;Groceries and supplies;-86.42;Household:Groceries;weekly
+2026-04-05;Transfer;Savings;Emergency Fund;Automatic savings;-600.00;Savings:Emergency;budget
+2026-04-08;Card;Checking;City Utilities;Electric and water bill;-214.18;Bills:Utilities;home
+2026-04-10;Card;Checking;Contoso Travel;Customer visit train;-183.20;Work:Travel;customer
+2026-04-12;Card;Checking;Blue Bottle Cafe;Partner meeting coffee;-17.65;Work:Meals;customer
+2026-04-15;Transfer;Checking;Credit Card;Monthly card payment;-1200.00;Bills:Credit Card;finance
+2026-04-20;Card;Checking;Online Books;Research notebook;-42.95;Education:Books;research

@@ -1,0 +1,37 @@
+# Xreader PDF reader probe
+app_name: xreader-pdf
+binary: xreader
+atspi_name: xreader
+document_path: ${DESKFORGE_ROOT}/assets/audit/sample_report.pdf
+document_semantics: ${DESKFORGE_ROOT}/assets/audit/sample_report.structure.json
+window_titles:
+  - quarterly_report.pdf
+  - Document Viewer
+  - Xreader
+args:
+  - ${DESKFORGE_ROOT}/assets/audit/sample_report.pdf
+
+interactions:
+  - name: default
+    description: Open local sample PDF in Xreader
+    actions:
+      - type: wait
+        value: "4.0"
+
+  - name: page_down
+    description: Scroll deeper into the PDF document
+    actions:
+      - type: wait
+        value: "2.5"
+      - type: key
+        value: "Page_Down"
+        delay: 1.0
+
+  - name: sidebar_toggle
+    description: Toggle the document sidebar
+    actions:
+      - type: wait
+        value: "2.5"
+      - type: key
+        value: "F9"
+        delay: 1.0

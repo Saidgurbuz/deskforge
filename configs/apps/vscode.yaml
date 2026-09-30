@@ -1,0 +1,179 @@
+# Visual Studio Code — local external bundle under tools/external_apps/
+app_name: vscode
+binary: ${DESKFORGE_ROOT}/tools/external_apps/bundles/VSCode-linux-x64/code
+atspi_name: Code
+cwd: ${DESKFORGE_ROOT}/tools/external_apps/bundles/VSCode-linux-x64
+args:
+  - "--force-renderer-accessibility"
+  - "--no-sandbox"
+  - "--disable-gpu"
+  - "--disable-dev-shm-usage"
+  - "--new-window"
+  - "--skip-release-notes"
+  - "--disable-workspace-trust"
+  - "--user-data-dir=/tmp/session_vscode_user"
+  - "${DESKFORGE_ROOT}/assets/audit/vscode_probe"
+  - "${DESKFORGE_ROOT}/assets/audit/vscode_probe/main.py"
+env:
+  ACCESSIBILITY_ENABLED: "1"
+  GNOME_ACCESSIBILITY: "1"
+  ELECTRON_ENABLE_ACCESSIBILITY: "1"
+window_titles: ["Visual Studio Code", "Code", "main.py", "analytics_service"]
+
+interactions:
+  - name: default
+    description: Open a deterministic workspace and file
+    actions:
+      - type: wait
+        value: "5.0"
+
+  - name: explorer_focus
+    description: Focus the explorer sidebar after workspace load
+    actions:
+      - type: wait
+        value: "3.0"
+      - type: key
+        value: "ctrl+shift+e"
+        delay: 1.0
+
+  - name: quick_open
+    description: Open Quick Open overlay
+    actions:
+      - type: wait
+        value: "3.0"
+      - type: key
+        value: "ctrl+p"
+        delay: 1.0
+
+  - name: search_panel
+    description: Open the global search panel
+    actions:
+      - type: wait
+        value: "3.0"
+      - type: key
+        value: "ctrl+shift+f"
+        delay: 1.0
+
+  - name: command_palette
+    description: Open the command palette overlay
+    actions:
+      - type: wait
+        value: "3.0"
+      - type: key
+        value: "ctrl+shift+p"
+        delay: 1.0
+
+  - name: integrated_terminal
+    description: Open the integrated terminal panel
+    actions:
+      - type: wait
+        value: "3.0"
+      - type: key
+        value: "ctrl+grave"
+        delay: 1.2
+
+  - name: problems_panel
+    description: Open the Problems panel
+    actions:
+      - type: wait
+        value: "3.0"
+      - type: key
+        value: "ctrl+shift+m"
+        delay: 1.0
+
+  - name: source_control
+    description: Open the source control view
+    actions:
+      - type: wait
+        value: "3.0"
+      - type: key
+        value: "ctrl+shift+g"
+        delay: 1.0
+
+  - name: settings_page
+    description: Open the Settings UI
+    actions:
+      - type: wait
+        value: "3.0"
+      - type: key
+        value: "ctrl+comma"
+        delay: 1.5
+
+chains:
+  - name: workspace_progressive
+    description: Capture the base workspace, Quick Open, then Search panel in one VS Code session
+    steps:
+      - name: workspace_loaded
+        actions:
+          - type: wait
+            value: "5.0"
+        capture: true
+      - name: quick_open
+        actions:
+          - type: key
+            value: "ctrl+p"
+            delay: 1.0
+        capture: true
+      - name: search_panel
+        actions:
+          - type: key
+            value: "Escape"
+            delay: 0.4
+          - type: key
+            value: "ctrl+shift+f"
+            delay: 1.0
+        capture: true
+
+  - name: workspace_panels
+    description: Capture command palette, problems, source control, and terminal panels in one VS Code session
+    steps:
+      - name: command_palette
+        actions:
+          - type: wait
+            value: "5.0"
+          - type: key
+            value: "ctrl+shift+p"
+            delay: 1.0
+        capture: true
+      - name: problems_panel
+        actions:
+          - type: key
+            value: "Escape"
+            delay: 0.4
+          - type: key
+            value: "ctrl+shift+m"
+            delay: 1.0
+        capture: true
+      - name: source_control
+        actions:
+          - type: key
+            value: "ctrl+shift+g"
+            delay: 1.0
+        capture: true
+      - name: integrated_terminal
+        actions:
+          - type: key
+            value: "ctrl+grave"
+            delay: 1.2
+        capture: true
+
+  - name: workspace_heuristic_explore
+    description: Use seeded heuristic clicks to navigate visible VS Code controls after load
+    steps:
+      - name: workspace_loaded
+        actions:
+          - type: wait
+            value: "5.0"
+        capture: true
+      - name: first_heuristic_click
+        actions:
+          - type: heuristic_click
+            value: "random|23"
+            delay: 2.5
+        capture: true
+      - name: second_heuristic_click
+        actions:
+          - type: heuristic_click
+            value: "random|31"
+            delay: 2.5
+        capture: true

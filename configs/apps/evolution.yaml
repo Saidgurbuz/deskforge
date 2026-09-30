@@ -1,0 +1,22 @@
+# Evolution — mail/calendar client
+app_name: evolution
+binary: evolution
+atspi_name: evolution
+window_titles:
+  - Evolution
+  - Welcome
+  - Mail Account Setup
+  - Restore Evolution Data
+
+interactions:
+  - name: default
+    description: Launch Evolution and wait for the startup surface
+    actions:
+      - type: wait
+        value: "3.0"
+
+  - name: audit_probe
+    description: Qualification probe after the initial startup surface settles
+    actions:
+      - type: wait
+        value: "4.0"

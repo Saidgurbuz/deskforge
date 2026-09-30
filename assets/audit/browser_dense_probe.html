@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DeskShot Browser Audit</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: "DejaVu Sans", sans-serif;
+      }
+      body {
+        margin: 0;
+        background: #eef3f8;
+        color: #17233b;
+      }
+      header,
+      main,
+      footer {
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: 16px 24px;
+      }
+      header {
+        background: linear-gradient(135deg, #f8fbff, #dfefff);
+        border-bottom: 1px solid #c5d7eb;
+      }
+      nav a {
+        margin-right: 16px;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 20px;
+      }
+      section,
+      aside,
+      article,
+      form,
+      table {
+        background: #ffffff;
+        border: 1px solid #cdd9e5;
+        border-radius: 10px;
+      }
+      section,
+      aside,
+      article,
+      form {
+        padding: 16px;
+      }
+      .toolbar,
+      .button-row,
+      .filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+      }
+      .stack {
+        display: grid;
+        gap: 12px;
+      }
+      label {
+        display: grid;
+        gap: 6px;
+        font-weight: 600;
+      }
+      input,
+      select,
+      textarea,
+      button,
+      progress,
+      meter {
+        font: inherit;
+      }
+      input,
+      select,
+      textarea {
+        padding: 8px 10px;
+        border: 1px solid #b3c5d7;
+        border-radius: 8px;
+        background: #fbfdff;
+      }
+      button {
+        padding: 8px 14px;
+        border: 1px solid #7f9dbd;
+        border-radius: 8px;
+        background: #eef5ff;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        overflow: hidden;
+      }
+      th,
+      td {
+        padding: 10px 12px;
+        border-bottom: 1px solid #dce5ee;
+        text-align: left;
+      }
+      ul {
+        padding-left: 20px;
+      }
+      .tabs {
+        display: flex;
+        gap: 8px;
+      }
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(180px, 1fr));
+        gap: 12px;
+      }
+      .card {
+        border: 1px solid #d3dee9;
+        border-radius: 8px;
+        padding: 12px;
+      }
+      footer {
+        color: #55647a;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>DeskShot Browser Audit</h1>
+      <p>Deterministic local page for dense browser accessibility qualification.</p>
+      <nav aria-label="Primary">
+        <a href="#overview">Overview</a>
+        <a href="#controls">Controls</a>
+        <a href="#records">Records</a>
+        <a href="#support">Support</a>
+      </nav>
+    </header>
+    <main class="stack">
+      <form aria-label="Search form">
+        <div class="toolbar">
+          <label>
+            Search
+            <input type="search" name="q" value="dense audit sample" />
+          </label>
+          <label>
+            Environment
+            <select name="environment">
+              <option selected>Linux</option>
+              <option>Windows</option>
+              <option>macOS</option>
+              <option>Ubuntu</option>
+            </select>
+          </label>
+          <button type="button">Run Audit</button>
+          <button type="reset">Reset</button>
+        </div>
+      </form>
+
+      <div class="layout">
+        <section id="overview" aria-labelledby="overview-heading">
+          <h2 id="overview-heading">Overview</h2>
+          <div class="tabs" role="tablist" aria-label="Audit tabs">
+            <button role="tab" aria-selected="true">Summary</button>
+            <button role="tab" aria-selected="false">Coverage</button>
+            <button role="tab" aria-selected="false">Warnings</button>
+          </div>
+          <article class="stack">
+            <p>
+              This page intentionally mixes navigation, form controls, tables,
+              lists, progress widgets, and repeated cards so AT-SPI extraction
+              can be evaluated on a stable local target.
+            </p>
+            <div class="cards" aria-label="Metric cards">
+              <div class="card">
+                <h3>Qualified Apps</h3>
+                <p>4</p>
+                <progress value="4" max="8">4 of 8</progress>
+              </div>
+              <div class="card">
+                <h3>Coverage</h3>
+                <p>74%</p>
+                <meter min="0" max="100" value="74">74%</meter>
+              </div>
+            </div>
+          </article>
+
+          <article id="controls" class="stack" aria-labelledby="controls-heading">
+            <h2 id="controls-heading">Controls</h2>
+            <div class="filters">
+              <label><input type="checkbox" checked /> Include desktop chrome</label>
+              <label><input type="checkbox" checked /> Keep unfiltered JSON</label>
+              <label><input type="radio" name="mode" checked /> Strict</label>
+              <label><input type="radio" name="mode" /> Review</label>
+            </div>
+            <label>
+              Notes
+              <textarea rows="4">Audit browser state should remain deterministic.</textarea>
+            </label>
+            <label>
+              Sampling ratio
+              <input type="range" min="0" max="100" value="60" />
+            </label>
+          </article>
+        </section>
+
+        <aside id="support" aria-labelledby="support-heading" class="stack">
+          <h2 id="support-heading">Support</h2>
+          <ul>
+            <li><a href="#records">Jump to record table</a></li>
+            <li><a href="mailto:deskshot@example.com">Email reviewer</a></li>
+            <li><a href="https://example.com/spec">Reference spec</a></li>
+          </ul>
+          <button type="button">Open Review Queue</button>
+          <button type="button">Export Snapshot</button>
+        </aside>
+      </div>
+
+      <section id="records" aria-labelledby="records-heading">
+        <h2 id="records-heading">Recent Records</h2>
+        <table>
+          <caption>Audit sample record table</caption>
+          <thead>
+            <tr>
+              <th scope="col">Sample</th>
+              <th scope="col">Status</th>
+              <th scope="col">Elements</th>
+              <th scope="col">Reviewer</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>firefox-rich-state</td>
+              <td>pass</td>
+              <td>41</td>
+              <td>Mina</td>
+            </tr>
+            <tr>
+              <td>chromium-local-page</td>
+              <td>review</td>
+              <td>28</td>
+              <td>Alex</td>
+            </tr>
+            <tr>
+              <td>thunar-search</td>
+              <td>pass</td>
+              <td>33</td>
+              <td>Sam</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+    <footer>
+      <p>DeskShot local browser audit fixture.</p>
+    </footer>
+  </body>
+</html>

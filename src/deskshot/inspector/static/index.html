@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DeskShot annotation inspector</title>
+<link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+<div id="app">
+
+  <header id="topbar">
+    <span class="brand">DeskShot<span class="dim"> inspector</span></span>
+    <span id="run-label" class="dim" title="the run being viewed"></span>
+    <span class="sep"></span>
+    <select id="view-select" title="which element list"></select>
+    <select id="image-kind" title="which image"></select>
+    <label class="toggle"><input type="checkbox" id="show-boxes" checked> boxes</label>
+    <label class="toggle"><input type="checkbox" id="show-labels"> labels</label>
+    <span class="sep"></span>
+    <button id="fit" title="fit to window (f)">fit</button>
+    <button id="zoom-one" title="100%">1:1</button>
+    <span id="zoom-level" class="dim">100%</span>
+    <span class="sep"></span>
+    <label class="toggle"><input type="checkbox" id="edit-mode"> edit (e)</label>
+    <button id="add-box" class="hidden" title="draw a new element (n)">+ element</button>
+    <span class="grow"></span>
+    <span id="status" class="dim"></span>
+    <button id="save" disabled title="save overlay (ctrl+s)">save</button>
+  </header>
+
+  <aside id="sidebar">
+    <div class="side-head">
+      <input id="sample-filter" type="search" placeholder="filter runs and samples&hellip;"
+             autocomplete="off">
+      <select id="mark-filter" title="filter by mark">
+        <option value="">all marks</option>
+        <option value="marked">marked</option>
+        <option value="unmarked">unmarked</option>
+        <option value="verified">verified</option>
+        <option value="needs_work">needs work</option>
+        <option value="rejected">rejected</option>
+      </select>
+    </div>
+    <div class="side-head">
+      <button id="collapse-all" title="collapse every folder">collapse</button>
+      <button id="reveal" title="expand the folders around the open sample">reveal</button>
+      <select id="tree-sort" title="order folders: newest first, or by name">
+        <option value="recent">newest</option>
+        <option value="name">name</option>
+      </select>
+      <button id="rescan" title="rescan the runs directory">&#8635;</button>
+    </div>
+    <div id="tree"></div>
+    <div id="sidebar-foot" class="dim"></div>
+  </aside>
+
+  <main id="viewer">
+    <div id="stage-wrap">
+      <div id="stage">
+        <img id="base-image" alt="">
+        <img id="detail-image" alt="">
+        <div id="boxes"></div>
+        <div id="draft"></div>
+      </div>
+    </div>
+    <div id="viewer-empty" class="empty">Pick a sample on the left.</div>
+    <div id="hover-readout" class="dim"></div>
+  </main>
+
+  <aside id="panel">
+    <nav class="tabs">
+      <button data-tab="element" class="active">element</button>
+      <button data-tab="stats">stats</button>
+      <button data-tab="audit">audit</button>
+      <button data-tab="meta">meta</button>
+      <button data-tab="mark">mark</button>
+      <button data-tab="screentag">tag</button>
+    </nav>
+    <section id="tab-element" class="tab active"></section>
+    <section id="tab-stats" class="tab"></section>
+    <section id="tab-audit" class="tab"></section>
+    <section id="tab-meta" class="tab"></section>
+    <section id="tab-mark" class="tab"></section>
+    <section id="tab-screentag" class="tab"></section>
+  </aside>
+
+</div>
+<script src="/static/app.js"></script>
+</body>
+</html>

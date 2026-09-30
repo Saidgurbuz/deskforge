@@ -1,0 +1,85 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>deskshot corpus</title>
+<link rel="stylesheet" href="/static/app.css">
+<link rel="stylesheet" href="/static/corpus.css">
+<body>
+<header id="bar">
+  <span class="brand">deskshot <b>corpus</b></span>
+  <nav id="crumbs"></nav>
+  <span class="spacer"></span>
+  <span id="scope" class="muted"></span>
+  <a class="plain" href="/">annotation inspector →</a>
+</header>
+
+<main>
+  <aside id="left">
+    <section id="filters">
+      <h2>find</h2>
+      <div class="row"><label>split</label><select id="f-split"></select></div>
+      <div class="row"><label>app</label><select id="f-app"></select></div>
+      <div class="row"><label>theme</label><select id="f-theme"></select></div>
+      <div class="row"><label>size</label><select id="f-resolution"></select></div>
+      <div class="row"><label>occluded ≥</label><input id="f-occ" type="number" min="0" max="1" step="0.05" placeholder="any"></div>
+      <div class="row"><label>windows ≥</label><input id="f-win" type="number" min="0" max="12" step="1" placeholder="any"></div>
+      <div class="row buttons">
+        <button id="f-go">search</button>
+        <button id="f-rand" title="a different seeded sample each press">shuffle</button>
+        <button id="f-clear" class="ghost">clear</button>
+      </div>
+      <p id="f-note" class="muted"></p>
+    </section>
+    <section id="listing">
+      <h2 id="listing-title">browse</h2>
+      <div id="entries"></div>
+      <div id="more"></div>
+    </section>
+  </aside>
+
+  <section id="stage">
+    <div id="controls">
+      <label>mode
+        <select id="c-mode">
+          <option value="overlay">overlay</option>
+          <option value="pair">raw | annotated</option>
+          <option value="zoom">zoom inset</option>
+          <option value="tag">ScreenTag</option>
+        </select>
+      </label>
+      <label>labels
+        <select id="c-labels">
+          <option value="auto">auto</option>
+          <option value="none">none</option>
+          <option value="all">all</option>
+        </select>
+      </label>
+      <label>view
+        <select id="c-view"></select>
+      </label>
+      <label>style
+        <select id="c-style">
+          <option value="paper">paper</option>
+          <option value="dark">dark</option>
+        </select>
+      </label>
+      <label class="check"><input type="checkbox" id="c-occ" checked> occlusion</label>
+      <label class="check"><input type="checkbox" id="c-legend" checked> legend</label>
+      <button id="c-reload" class="ghost">re-render</button>
+      <span class="spacer"></span>
+      <span id="c-state" class="muted"></span>
+    </div>
+    <div id="canvas"><p class="empty">Pick a capture on the left. It is rendered when you click it and never stored.</p></div>
+  </section>
+
+  <aside id="right">
+    <div id="tabs">
+      <button data-tab="facts" class="on">facts</button>
+      <button data-tab="tag">ScreenTag</button>
+      <button data-tab="meta">meta</button>
+    </div>
+    <div id="panel"></div>
+  </aside>
+</main>
+
+<script src="/static/corpus.js"></script>
+</body>

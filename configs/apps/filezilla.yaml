@@ -1,0 +1,30 @@
+# FileZilla — dense FTP/SFTP client UI
+app_name: filezilla
+binary: filezilla
+atspi_name: filezilla
+window_titles:
+  - FileZilla
+
+env:
+  GTK_MODULES: gail:atk-bridge
+
+interactions:
+  - name: default
+    description: Open FileZilla in offline quickconnect view
+    actions:
+      - type: wait
+        value: "2.5"
+
+  - name: site_manager
+    description: Open the site manager dialog
+    actions:
+      - type: key
+        value: "ctrl+s"
+        delay: 1.0
+
+  - name: file_menu
+    description: Open the File menu
+    actions:
+      - type: key
+        value: "alt+f"
+        delay: 1.0

@@ -1,0 +1,54 @@
+# Archive Manager
+app_name: file-roller
+binary: file-roller
+atspi_name: file-roller
+args:
+  - ${DESKFORGE_ROOT}/assets/audit/workspace_probe_archive.zip
+window_titles: ["Archive Manager", "File Roller", "file-roller"]
+
+interactions:
+  - name: default
+    description: Archive manager opened on a deterministic local sample archive
+    actions:
+      - type: wait
+        value: "2.5"
+
+  - name: menu_open
+    description: Open the application menu for a richer chrome state
+    actions:
+      - type: wait
+        value: "1.0"
+      - type: key
+        value: "F10"
+        delay: 1.0
+
+  - name: heuristic_probe
+    description: Click a seeded visible archive control or row
+    actions:
+      - type: wait
+        value: "1.0"
+      - type: heuristic_click
+        value: "random|23"
+        delay: 1.0
+
+chains:
+  - name: archive_progressive
+    description: Capture baseline archive view, menu state, then one seeded visible click
+    steps:
+      - name: baseline
+        actions:
+          - type: wait
+            value: "2.5"
+        capture: true
+      - name: menu_open
+        actions:
+          - type: key
+            value: "F10"
+            delay: 1.0
+        capture: true
+      - name: heuristic_click
+        actions:
+          - type: heuristic_click
+            value: "random|25"
+            delay: 1.0
+        capture: true

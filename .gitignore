@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+
+# IDE
+.vscode/
+.idea/
+
+# Tools (extracted RPMs — large, not tracked)
+tools/
+
+# Data outputs
+data/
+tmp/
+
+# Incremental checks / scratch
+incremental_checks/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+archive/
+
+# Display leases held by running workers; never shared between machines.
+.deskshot/
+
+# Example outputs from the README quick start
+runs/
+.pytest_cache/

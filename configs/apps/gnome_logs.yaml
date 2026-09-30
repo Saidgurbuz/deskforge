@@ -1,0 +1,33 @@
+# GNOME Logs — system log viewer candidate
+app_name: gnome-logs
+binary: gnome-logs
+atspi_name: gnome-logs
+window_titles:
+  - Logs
+
+env:
+  GTK_MODULES: gail:atk-bridge
+
+interactions:
+  - name: default
+    description: Open the logs viewer
+    actions:
+      - type: wait
+        value: "2.5"
+
+  - name: search
+    description: Search for a deterministic log keyword
+    actions:
+      - type: key
+        value: "ctrl+f"
+        delay: 0.8
+      - type: type_text
+        value: "system"
+        delay: 0.8
+
+  - name: menu_open
+    description: Open application menu
+    actions:
+      - type: key
+        value: "F10"
+        delay: 1.0

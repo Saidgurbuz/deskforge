@@ -1,0 +1,17 @@
+app_name: libreoffice-writer
+binary: soffice
+args:
+  - --writer
+  - --nologo
+  - --norestore
+  - --nofirststartwizard
+atspi_name: soffice
+window_titles:
+  - LibreOffice Writer
+  - Writer
+interactions:
+  - name: default
+    description: Default Writer window
+    actions:
+      - type: wait
+        value: "3.0"

@@ -1,0 +1,43 @@
+# Nautilus — GNOME file manager
+app_name: nautilus
+binary: nautilus
+atspi_name: nautilus
+args: ["--new-window"]
+
+interactions:
+  - name: default
+    description: Default file browser (home directory)
+    actions:
+      - type: wait
+        value: "2.0"
+
+  - name: search
+    description: Open search bar
+    actions:
+      - type: key
+        value: "ctrl+f"
+        delay: 1.0
+
+  - name: context_menu
+    description: Right-click context menu
+    actions:
+      - type: wait
+        value: "1.0"
+      # Right-click in the file area
+      - type: click
+        value: "600,400,3"
+        delay: 0.8
+
+  - name: sidebar_places
+    description: Show sidebar with places
+    actions:
+      - type: key
+        value: "F9"
+        delay: 0.8
+
+  - name: grid_view
+    description: Switch to grid/icon view
+    actions:
+      - type: key
+        value: "ctrl+2"
+        delay: 0.8

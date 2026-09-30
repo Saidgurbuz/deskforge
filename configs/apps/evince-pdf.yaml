@@ -1,0 +1,34 @@
+# Evince PDF viewer probe
+app_name: evince-pdf
+binary: evince
+atspi_name: evince
+window_titles:
+  - quarterly_report.pdf
+  - Document Viewer
+args:
+  - ${DESKFORGE_ROOT}/assets/audit/sample_report.pdf
+
+interactions:
+  - name: default
+    description: Open local sample PDF in Evince
+    actions:
+      - type: wait
+        value: "3.5"
+
+  - name: page_down
+    description: Scroll deeper into the PDF document
+    actions:
+      - type: wait
+        value: "2.0"
+      - type: key
+        value: "Page_Down"
+        delay: 1.0
+
+  - name: sidebar_toggle
+    description: Toggle the document sidebar
+    actions:
+      - type: wait
+        value: "2.0"
+      - type: key
+        value: "F9"
+        delay: 1.0

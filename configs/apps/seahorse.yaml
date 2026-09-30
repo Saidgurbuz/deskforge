@@ -1,0 +1,34 @@
+# Seahorse — passwords and keys manager candidate
+app_name: seahorse
+binary: seahorse
+atspi_name: seahorse
+window_titles:
+  - Passwords and Keys
+  - Seahorse
+
+env:
+  GTK_MODULES: gail:atk-bridge
+
+interactions:
+  - name: default
+    description: Open passwords and keys manager
+    actions:
+      - type: wait
+        value: "2.5"
+
+  - name: search
+    description: Focus search in the manager
+    actions:
+      - type: key
+        value: "ctrl+f"
+        delay: 1.0
+      - type: type_text
+        value: "keyring"
+        delay: 0.5
+
+  - name: app_menu
+    description: Open application menu
+    actions:
+      - type: key
+        value: "F10"
+        delay: 1.0

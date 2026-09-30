@@ -1,0 +1,110 @@
+# Thunar - XFCE file manager
+app_name: thunar
+binary: thunar
+atspi_name: thunar
+args:
+  - ${DESKFORGE_ROOT}/assets/audit/workspace_probe
+window_titles: ["Thunar", "File Manager"]
+
+interactions:
+  - name: default
+    description: Default file manager view
+    actions:
+      - type: wait
+        value: "2.0"
+
+  - name: search_mode
+    description: Open Thunar search mode
+    actions:
+      - type: key
+        value: "ctrl+f"
+        delay: 1.0
+
+  - name: search_typed
+    description: Open search mode and type a query
+    actions:
+      - type: key
+        value: "ctrl+f"
+        delay: 0.8
+      - type: type_text
+        value: "tmp"
+        delay: 0.8
+
+  - name: location_bar
+    description: Focus the location entry for an explicit path-bar state
+    actions:
+      - type: key
+        value: "ctrl+l"
+        delay: 1.0
+
+  - name: menu_open
+    description: Open the Thunar menu bar for a richer chrome state
+    actions:
+      - type: key
+        value: "F10"
+        delay: 1.0
+
+chains:
+  - name: search_progressive
+    description: Capture baseline Thunar, then search mode, then a seeded visible control click
+    steps:
+      - name: baseline
+        actions:
+          - type: wait
+            value: "2.0"
+        capture: true
+      - name: search_mode
+        actions:
+          - type: key
+            value: "ctrl+f"
+            delay: 0.8
+          - type: type_text
+            value: "tmp"
+            delay: 0.8
+        capture: true
+      - name: heuristic_click
+        actions:
+          - type: heuristic_click
+            value: "random|7"
+            delay: 1.2
+        capture: true
+
+  - name: workspace_progressive
+    description: Baseline workspace view, then explicit path bar, then a seeded visible control click
+    steps:
+      - name: baseline
+        actions:
+          - type: wait
+            value: "2.0"
+        capture: true
+      - name: location_bar
+        actions:
+          - type: key
+            value: "ctrl+l"
+            delay: 1.0
+        capture: true
+      - name: heuristic_click
+        actions:
+          - type: heuristic_click
+            value: "random|13"
+            delay: 1.2
+        capture: true
+
+  - name: with_eog_scatter
+    description: Open Thunar, then launch EOG with a deterministic image and scatter both windows
+    steps:
+      - name: baseline
+        actions:
+          - type: wait
+            value: "2.0"
+        capture: true
+      - name: mixed_scene
+        companion_apps: ["eog"]
+        actions_after_companions: true
+        actions:
+          - type: wait
+            value: "2.0"
+          - type: randomize_layout
+            value: "cascade"
+            delay: 0.8
+        capture: true

@@ -1,0 +1,69 @@
+# Chromium built-in PDF viewer probe
+app_name: chromium-pdf
+binary: chromium-browser
+atspi_name: Chromium
+document_path: ${DESKFORGE_ROOT}/assets/audit/sample_report.pdf
+document_semantics: ${DESKFORGE_ROOT}/assets/audit/sample_report.structure.json
+window_titles:
+  - quarterly_report.pdf - Chromium
+  - Chromium
+args:
+  - --no-sandbox
+  - --disable-gpu
+  - --disable-dev-shm-usage
+  - --no-first-run
+  - --no-default-browser-check
+  - --password-store=basic
+  - --force-renderer-accessibility
+  - --user-data-dir=/tmp/session_chromium_pdf_profile
+  - file://${DESKFORGE_ROOT}/assets/audit/sample_report.pdf
+env:
+  ACCESSIBILITY_ENABLED: "1"
+  GNOME_ACCESSIBILITY: "1"
+
+interactions:
+  - name: default
+    description: Open local sample PDF in Chromium
+    actions:
+      - type: wait
+        value: "4.0"
+
+  - name: page_down
+    description: Scroll deeper into the PDF document
+    actions:
+      - type: wait
+        value: "3.0"
+      - type: key
+        value: "Page_Down"
+        delay: 1.0
+
+  - name: find_bar
+    description: Open the PDF find bar
+    actions:
+      - type: wait
+        value: "3.0"
+      - type: key
+        value: "ctrl+f"
+        delay: 1.0
+
+chains:
+  - name: pdf_progressive
+    description: Capture page 1, then page 2, then the find bar
+    steps:
+      - name: page1
+        actions:
+          - type: wait
+            value: "4.0"
+        capture: true
+      - name: page2
+        actions:
+          - type: key
+            value: "Page_Down"
+            delay: 1.0
+        capture: true
+      - name: find_bar
+        actions:
+          - type: key
+            value: "ctrl+f"
+            delay: 1.0
+        capture: true

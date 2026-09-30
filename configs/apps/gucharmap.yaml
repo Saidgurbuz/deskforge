@@ -1,0 +1,14 @@
+# Character Map
+app_name: gucharmap
+binary: gucharmap
+atspi_name: gucharmap
+window_titles:
+  - Character Map
+  - gucharmap
+
+interactions:
+  - name: default
+    description: Character Map opened to its default searchable grid view
+    actions:
+      - type: wait
+        value: "2.5"

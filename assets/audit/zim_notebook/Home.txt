@@ -1,0 +1,18 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.6
+Creation-Date: 2026-05-05T08:00:00+00:00
+
+====== DeskShot Notes ======
+Created Tuesday 05 May 2026
+
+This notebook contains a project checklist, customer follow-up notes, and meeting actions.
+
+===== Action Items =====
+* Review Thunderbird annotations
+* Validate chat-style applications
+* Prepare offline customer support examples
+
+===== Customer Follow-up =====
+* Send the updated accessibility report to Acme Support
+* Confirm the onboarding dashboard owner
+* Schedule a screen parsing data review with product operations

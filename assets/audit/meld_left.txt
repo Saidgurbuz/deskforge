@@ -1,0 +1,4 @@
+DeskShot comparison fixture
+version = left
+status = draft
+owner = team-a

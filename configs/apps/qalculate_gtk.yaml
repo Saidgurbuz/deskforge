@@ -1,0 +1,35 @@
+# Qalculate GTK — advanced calculator candidate
+app_name: qalculate-gtk
+binary: qalculate-gtk
+atspi_name: qalculate-gtk
+window_titles:
+  - Qalculate
+
+env:
+  GTK_MODULES: gail:atk-bridge
+  QT_ACCESSIBILITY: "1"
+  QT_LINUX_ACCESSIBILITY_ALWAYS_ON: "1"
+
+interactions:
+  - name: default
+    description: Open advanced calculator UI
+    actions:
+      - type: wait
+        value: "2.0"
+
+  - name: expression
+    description: Type a unit conversion expression
+    actions:
+      - type: type_text
+        value: "sqrt(144)+25 USD to EUR"
+        delay: 0.5
+      - type: key
+        value: "Return"
+        delay: 1.0
+
+  - name: menu_open
+    description: Open the File menu
+    actions:
+      - type: key
+        value: "alt+f"
+        delay: 1.0

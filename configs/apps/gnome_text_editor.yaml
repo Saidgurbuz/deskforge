@@ -1,0 +1,44 @@
+# GNOME Text Editor (gedit) — text editing UI
+app_name: gnome-text-editor
+binary: gedit
+atspi_name: gedit
+
+interactions:
+  - name: default
+    description: Default empty editor view
+    actions:
+      - type: wait
+        value: "1.5"
+
+  - name: typed_text
+    description: Editor with typed content
+    actions:
+      - type: type_text
+        value: "Hello! Draft notes for the weekly review."
+        delay: 0.5
+
+  - name: open_dialog
+    description: Open file dialog
+    actions:
+      - type: key
+        value: "ctrl+o"
+        delay: 1.0
+
+  - name: preferences
+    description: Open preferences dialog
+    actions:
+      - type: key
+        value: "F10"
+        delay: 0.5
+      - type: key
+        value: "Down"
+      - type: key
+        value: "Return"
+        delay: 1.0
+
+  - name: find_bar
+    description: Open find/replace bar
+    actions:
+      - type: key
+        value: "ctrl+f"
+        delay: 0.8

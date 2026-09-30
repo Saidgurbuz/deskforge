@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>DeskShot inspector - self check</title>
+<style>
+  body { margin: 0; font: 13px/1.5 -apple-system, "Segoe UI", Roboto, sans-serif;
+         background: #14171c; color: #d8dee9; }
+  header { padding: 10px 14px; border-bottom: 1px solid #2f3846; }
+  #summary { font-weight: 600; }
+  #summary.pass { color: #6fcf7f; }
+  #summary.fail { color: #e07a7a; }
+  ol { margin: 0; padding: 8px 14px 8px 34px; }
+  li { margin: 2px 0; }
+  li.pass::marker { color: #6fcf7f; }
+  li.fail { color: #e07a7a; }
+  li.skip { color: #8b95a5; }
+  .detail { color: #8b95a5; }
+  #frame { width: 1400px; height: 900px; border: 1px solid #2f3846; }
+  code { font-family: ui-monospace, Menlo, Consolas, monospace; }
+</style>
+</head>
+<body>
+
+<header>
+  <div id="summary">running…</div>
+  <div class="detail">
+    Drives the inspector in the frame below and checks what it did.
+    <code>?write=1</code> also exercises saving (it only touches a sample that has
+    no stored overlay, and deletes what it wrote).
+    <code>?run=&lt;run&gt;</code> pins which run to use.
+  </div>
+</header>
+<ol id="rows"></ol>
+<iframe id="frame" src="/"></iframe>
+
+<script>
+/* A self-driving smoke test for the inspector UI.
+ *
+ * It exists because the interesting failures here are not in the request layer
+ * - which `tests/test_inspector_app.py` covers - but in the browser: a tree
+ * that renders nothing, a click that loads the wrong sample, an edit that never
+ * reaches disk. Those need a real DOM and a real server.
+ *
+ * It is a page rather than a test script so it can be used both ways: open it
+ * in a browser to watch the checks run, or let `tests/test_inspector_browser.py`
+ * load it in headless Chromium and read the summary line out of the dumped DOM.
+ * The page is same-origin with the app, so it can reach into the frame; that is
+ * the whole trick, and the reason this is served from `/static/`.
+ */
+(function () {
+"use strict";
+
+var params = new URLSearchParams(location.search);
+var WRITE = params.get("write") === "1";
+var PINNED_RUN = params.get("run") || "";
+var TIMEOUT = Number(params.get("timeout") || 20000);
+
+var pass = 0, fail = 0, skip = 0;
+
+function record(state, name, detail) {
+  var li = document.createElement("li");
+  li.className = state;
+  li.textContent = state.toUpperCase() + "  " + name;
+  if (detail) {
+    var span = document.createElement("span");
+    span.className = "detail";
+    span.textContent = "  — " + detail;
+    li.appendChild(span);
+  }
+  document.getElementById("rows").appendChild(li);
+  if (state === "pass") pass += 1;
+  else if (state === "fail") fail += 1;
+  else skip += 1;
+}
+
+function check(name, condition, detail) {
+  record(condition ? "pass" : "fail", name, detail);
+  return !!condition;
+}
+
+function finish(note) {
+  var summary = document.getElementById("summary");
+  summary.className = fail ? "fail" : "pass";
+  summary.textContent =
+    "PROBE pass=" + pass + " fail=" + fail + " skip=" + skip + (note ? " (" + note + ")" : "");
+  summary.setAttribute("data-done", "1");
+}
+
+function until(what, predicate) {
+  var deadline = Date.now() + TIMEOUT;
+  return new Promise(function (resolve, reject) {
+    (function tick() {
+      var value = null;
+      try { value = predicate(); } catch (err) { value = null; }
+      if (value) return resolve(value);
+      if (Date.now() > deadline) return reject(new Error("timed out waiting for " + what));
+      setTimeout(tick, 50);
+    })();
+  });
+}
+
+function settle(ms) {
+  return new Promise(function (resolve) { setTimeout(resolve, ms || 400); });
+}
+
+var frame = document.getElementById("frame");
+function doc() { return frame.contentDocument; }
+function win() { return frame.contentWindow; }
+function all(selector) {
+  return Array.prototype.slice.call(doc().querySelectorAll(selector));
+}
+function fire(node, type, name, init) {
+  // `new win().X(...)` binds `new` to the call, not the constructor.
+  var W = win();
+  node.dispatchEvent(new W[type](name, init));
+}
+function click(node) { fire(node, "MouseEvent", "click", { bubbles: true }); }
+
+/* Selection goes through the viewer's own pointer handling rather than a
+   shortcut into its state, because that path - hit test, cycle, select - is
+   exactly what a regression would break. */
+function clickBox(box) {
+  var rect = box.getBoundingClientRect();
+  var wrap = doc().getElementById("stage-wrap");
+  var at = { clientX: rect.left + rect.width / 2, clientY: rect.top + rect.height / 2,
+             bubbles: true, button: 0, pointerId: 1 };
+  fire(wrap, "PointerEvent", "pointerdown", at);
+  fire(wrap, "PointerEvent", "pointerup", at);
+}
+
+function runNodes() {
+  return all("#tree .tnode[data-run-node]");
+}
+
+function activeSample() {
+  return doc().querySelector("#tree .sample.active");
+}
+
+var story = Promise.resolve();
+function step(fn) { story = story.then(fn); return story; }
+
+// ---------------------------------------------------------------- the story
+
+var state = {};
+
+step(function () {
+  return until("the app to boot", function () {
+    return doc() && doc().getElementById("tree");
+  });
+});
+
+step(function () {
+  return until("the run tree", function () {
+    var rows = all("#tree .tnode[data-path]");
+    return rows.length ? rows : null;
+  }).then(function (rows) {
+    check("tree renders folders", rows.length > 0, rows.length + " rows");
+  });
+});
+
+step(function () {
+  if (!PINNED_RUN) return null;
+  // Navigating by hash is the documented way to address a sample, so use it.
+  win().location.hash = PINNED_RUN + "|";
+  win().location.reload();
+  return until("the pinned run to load", function () {
+    return doc() && doc().getElementById("tree") &&
+           doc().getElementById("run-label").textContent === PINNED_RUN;
+  });
+});
+
+step(function () {
+  return until("a sample to load by itself", function () {
+    return all("#boxes .box").length ? true : null;
+  }).then(function () {
+    var label = doc().getElementById("run-label").textContent;
+    state.run = label;
+    check("opening a run loads its first sample", !!label && !!activeSample(),
+          label + " · " + all("#boxes .box").length + " boxes");
+  });
+});
+
+step(function () {
+  return until("sample rows", function () {
+    var rows = all("#tree .sample");
+    return rows.length ? rows : null;
+  }).then(function (rows) {
+    state.rows = rows;
+    check("samples appear as leaves under their run", rows.length > 0,
+          rows.length + " samples in " + state.run);
+  });
+});
+
+function otherRuns() {
+  return runNodes().filter(function (row) { return row.dataset.path !== state.run; });
+}
+
+/* The race needs a second run to race against, and a freshly loaded tree may
+   have none visible: every other run can be one folder down. Open folders until
+   one surfaces. Folders cost nothing to expand - only runs fetch. */
+step(function () {
+  if (otherRuns().length) return null;
+  all("#tree .tnode:not([data-run-node])").filter(function (row) {
+    return state.run.indexOf(row.dataset.path) !== 0;
+  }).slice(0, 5).forEach(click);
+  return settle(200);
+});
+
+/* The regression this exists for: a click that lands while another run is
+   loading used to be overridden by that run's auto-load of its first sample. */
+step(function () {
+  var rows = all("#tree .sample");
+  var other = otherRuns()[0];
+  if (rows.length < 2 || !other) {
+    record("skip", "a click beats a racing run auto-load",
+           rows.length < 2 ? "only one sample" : "no second run to race against");
+    return;
+  }
+  var wanted = rows[1].dataset.stem;
+  click(other);                     // starts a run listing, which will auto-load
+  click(rows[1]);                   // and this must win
+  return settle(1200).then(function () {
+    return until("the clicked sample", function () {
+      var active = activeSample();
+      return active && active.dataset.stem === wanted ? active : null;
+    }).then(function (active) {
+      check("a click beats a racing run auto-load",
+            active.dataset.stem === wanted && active.dataset.run === state.run,
+            "landed on " + active.dataset.stem.slice(0, 22));
+      state.stem = wanted;
+    }, function (err) {
+      var active = activeSample();
+      check("a click beats a racing run auto-load", false,
+            (active ? "landed on " + active.dataset.stem : String(err.message)));
+    });
+  });
+});
+
+step(function () {
+  return until("boxes for the clicked sample", function () {
+    return all("#boxes .box").length ? true : null;
+  }).then(function () {
+    check("clicking a sample loads it", all("#boxes .box").length > 0,
+          all("#boxes .box").length + " boxes");
+  });
+});
+
+step(function () {
+  var before = all("#tree .tnode[data-path]").length;
+  var box = doc().getElementById("sample-filter");
+  var name = state.run.split("/")[0];
+  box.value = name;
+  fire(box, "Event", "input", {});
+  return settle(200).then(function () {
+    var rows = all("#tree .tnode");
+    // The root carries an empty path and is the ancestor of everything, so it
+    // survives every filter by construction; only named folders can be
+    // off-target.
+    var offTarget = rows.filter(function (row) {
+      var path = row.dataset.path || "";
+      return path !== "" && path.indexOf(name) !== 0;
+    });
+    check("the filter narrows the tree to matching folders",
+          rows.length > 0 && rows.length < before && offTarget.length === 0,
+          rows.length + " of " + before + " rows kept" +
+          (offTarget.length
+            ? "; off-target: " + offTarget.map(function (r) {
+                return r.dataset.path;
+              }).join(", ")
+            : ""));
+    box.value = "";
+    fire(box, "Event", "input", {});
+  });
+});
+
+step(function () {
+  var open = all("#tree .sample").length;
+  var active = activeSample();
+  var run = active && active.dataset.run;
+  var stem = active && active.dataset.stem;
+  click(doc().getElementById("collapse-all"));
+  return settle(200).then(function () {
+    var collapsed = all("#tree .sample").length;
+    click(doc().getElementById("reveal"));
+    return settle(400).then(function () {
+      // `reveal` is scoped to the open sample by design ("expand the folders
+      // around the open sample"), so the contract is that its own run comes
+      // back - not every leaf that happened to be expanded beforehand.
+      var back = all("#tree .sample");
+      var mine = back.filter(function (r) { return r.dataset.run === run; });
+      var found = back.some(function (r) { return r.dataset.stem === stem; });
+      check("collapse hides the leaves and reveal brings back the open sample's run",
+            open > 0 && collapsed === 0 && mine.length > 0 && found,
+            open + " → " + collapsed + " → " + back.length +
+            " (" + mine.length + " in " + run + ", open sample " +
+            (found ? "present" : "MISSING") + ")");
+    });
+  });
+});
+
+// --------------------------------------------------------------- screentag
+
+/* The tag pane and the image are supposed to be two views of one list. What
+   can break silently is the alignment: a rendering that drops a character, or a
+   span index that is off by one element, still lights *a* block up for every
+   box and would quietly attribute one widget's markup to its neighbour. So
+   every check here names the element it expects on both sides. */
+
+function boxFor(key) {
+  return all("#boxes .box").filter(function (node) { return node.dataset.key === key; })[0];
+}
+
+function blockNode(index) {
+  return doc().querySelector('#tag-code [data-block="' + index + '"]');
+}
+
+step(function () {
+  click(doc().querySelector('.tabs button[data-tab="screentag"]'));
+  return until("the tag pane", function () {
+    return doc().getElementById("tag-code");
+  }).then(function () {
+    var active = activeSample();
+    return fetch("/api/screentag?run=" + encodeURIComponent(active.dataset.run) +
+                 "&stem=" + encodeURIComponent(active.dataset.stem) + "&spans=1")
+      .then(function (r) { return r.json(); })
+      .then(function (body) {
+        state.tag = body;
+        state.linked = body.spans.filter(function (span) { return span.key; });
+        check("the rendered tag is the file, character for character",
+              doc().getElementById("tag-code").textContent === body.text,
+              body.text.length + " chars · " + body.spans.length + " blocks · " +
+              body.stats.matched + " linked");
+      });
+  }, function (err) {
+    check("the screentag pane renders", false, String(err.message));
+  });
+});
+
+step(function () {
+  if (!state.tag) return null;
+  var span = state.linked[state.linked.length - 1];
+  state.first = span;
+  click(blockNode(state.tag.spans.indexOf(span)));
+  return settle(200).then(function () {
+    var box = doc().querySelector("#boxes .box.selected");
+    check("a block in the tag selects the box it was serialized from",
+          !!box && box.dataset.key === span.key,
+          "<" + span.tag + "> → " + (box ? box.dataset.key : "nothing selected") +
+          ", wanted " + span.key);
+  });
+});
+
+/* The visible proof that the link is the right way round: the block's own
+   `<loc_>` tokens, decoded, have to land on the rect of the element the panel
+   is showing - not merely on *some* element. */
+step(function () {
+  if (!state.tag || !state.first) return null;
+  var span = state.first;
+  var panel = doc().getElementById("tag-block").textContent;
+  var box = boxFor(span.key);
+  var rect = box ? {
+    x: parseFloat(box.style.left), y: parseFloat(box.style.top),
+    w: parseFloat(box.style.width), h: parseFloat(box.style.height)
+  } : null;
+  var cell = state.tag.viewport.width / state.tag.grid;
+  var cellY = state.tag.viewport.height / state.tag.grid;
+  var close = rect && Math.abs(rect.x - span.rect.x) <= cell &&
+              Math.abs(rect.y - span.rect.y) <= cellY &&
+              Math.abs((rect.x + rect.w) - (span.rect.x + span.rect.w)) <= 2 * cell &&
+              Math.abs((rect.y + rect.h) - (span.rect.y + span.rect.h)) <= 2 * cellY;
+  check("the block's loc tokens decode onto that same box",
+        !!close && panel.indexOf(span.rect.x + "," + span.rect.y) >= 0,
+        "loc " + span.loc.join(",") + " → " +
+        (span.rect.x + "," + span.rect.y + " " + span.rect.w + "×" + span.rect.h) +
+        " vs box " + (rect ? rect.x + "," + rect.y + " " + rect.w + "×" + rect.h : "none"));
+});
+
+step(function () {
+  if (!state.tag) return null;
+  // A child block, so the click lands on a box the window's own box overlaps -
+  // the innermost-wins rule has to hold on both sides.
+  var span = state.linked.filter(function (item) { return item.depth > 0; })[0] || state.linked[0];
+  var index = state.tag.spans.indexOf(span);
+  var box = boxFor(span.key);
+  if (!box) { record("skip", "selecting a box reveals its block", "no box for " + span.key); return; }
+  clickBox(box);
+  return settle(250).then(function () {
+    var active = doc().querySelector("#tag-code .tgb.active");
+    check("selecting a box in the image reveals its block in the tag",
+          !!active && Number(active.dataset.block) === index,
+          span.key + " → block " + (active ? active.dataset.block : "none") +
+          ", wanted " + index);
+  });
+});
+
+step(function () {
+  if (!state.tag) return null;
+  var selected = doc().querySelector("#boxes .box.selected");
+  var chosen = selected && selected.dataset.key;
+  var span = state.linked.filter(function (item) { return item.key !== chosen; })[0];
+  if (!span) { record("skip", "hovering a block flashes its box", "only one linked block"); return; }
+  fire(blockNode(state.tag.spans.indexOf(span)), "MouseEvent", "mouseover", { bubbles: true });
+  return settle(150).then(function () {
+    var peeked = all("#boxes .box.peek");
+    check("hovering a block flashes its box without taking the selection",
+          peeked.length === 1 && peeked[0].dataset.key === span.key &&
+          doc().querySelector("#boxes .box.selected").dataset.key === chosen,
+          peeked.length + " peeked, selection still " + chosen);
+  });
+});
+
+// ------------------------------------------------------------------- edits
+
+step(function () {
+  if (!WRITE) { record("skip", "an edit round-trips", "pass ?write=1 to include it"); return; }
+  var sample = activeSample();
+  state.run = sample.dataset.run;
+  state.stem = sample.dataset.stem;
+  return fetch("/api/sample?run=" + encodeURIComponent(state.run) +
+               "&stem=" + encodeURIComponent(state.stem) + "&view=leaf")
+    .then(function (r) { return r.json(); })
+    .then(function (body) {
+      if (body.overlay) {
+        record("skip", "an edit round-trips",
+               "this sample already has a stored overlay; refusing to touch it");
+        state.skipWrite = true;
+      }
+    });
+});
+
+step(function () {
+  if (!WRITE || state.skipWrite) return null;
+  win().confirm = function () { return true; };   // "discard unsaved edits?"
+  var edit = doc().getElementById("edit-mode");
+  edit.checked = true;
+  fire(edit, "Event", "change", {});
+
+  var boxes = all("#boxes .box");
+  clickBox(boxes[boxes.length - 1]);
+  return until("an element panel", function () {
+    return doc().querySelector('#tab-element input[data-field="role"]');
+  }).then(function (input) {
+    state.role = "probe-role-" + Date.now().toString(36);
+    input.value = state.role;
+    fire(input, "Event", "change", {});
+    return until("the edit to register", function () {
+      return doc().getElementById("save").disabled === false;
+    });
+  });
+});
+
+step(function () {
+  if (!WRITE || state.skipWrite) return null;
+  click(doc().getElementById("save"));
+  return until("the save to land", function () {
+    var status = doc().getElementById("status");
+    return status.className.indexOf("saved") >= 0 ? status.textContent : null;
+  }).then(function (text) {
+    check("saving an edit reports success", true, text.slice(0, 60));
+  }, function (err) {
+    check("saving an edit reports success", false, String(err.message));
+  });
+});
+
+step(function () {
+  if (!WRITE || state.skipWrite) return null;
+  // Reload the sample from the server and look for the edit in what comes back.
+  return fetch("/api/sample?run=" + encodeURIComponent(state.run) +
+               "&stem=" + encodeURIComponent(state.stem) + "&view=leaf")
+    .then(function (r) { return r.json(); })
+    .then(function (body) {
+      var hit = (body.elements || []).filter(function (element) {
+        return element.role === state.role;
+      });
+      check("an edit round-trips through the server", hit.length === 1,
+            hit.length + " element(s) with the new role");
+      check("the overlay carries a version for compare-and-set",
+            !!body.overlay_version, String(body.overlay_version));
+      state.version = body.overlay_version;
+    });
+});
+
+step(function () {
+  if (!WRITE || state.skipWrite || !state.version) return null;
+  // A second editor's save, built on the version before ours, must be refused.
+  return fetch("/api/overlay", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ run: state.run, stem: state.stem, view: "leaf",
+                           base_version: null, mark: { status: "rejected" } })
+  }).then(function (r) {
+    check("a save built on a stale version is refused", r.status === 409,
+          "HTTP " + r.status);
+  });
+});
+
+step(function () {
+  if (!WRITE || state.skipWrite) return null;
+  return fetch("/api/overlay?run=" + encodeURIComponent(state.run) +
+               "&stem=" + encodeURIComponent(state.stem) + "&view=leaf",
+               { method: "DELETE" })
+    .then(function (r) { return r.json(); })
+    .then(function (body) {
+      check("the probe cleans up after itself", body.removed === true, body.path || "");
+    });
+});
+
+story.then(function () { finish(); }, function (err) {
+  record("fail", "the probe itself", String(err && err.message ? err.message : err));
+  finish("aborted");
+});
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+# Evince — GNOME document/PDF viewer
+app_name: evince
+binary: evince
+atspi_name: evince
+
+interactions:
+  - name: default
+    description: Default empty viewer
+    actions:
+      - type: wait
+        value: "1.5"
+
+  - name: open_dialog
+    description: Open file dialog
+    actions:
+      - type: key
+        value: "ctrl+o"
+        delay: 1.0
+
+  - name: sidebar_toggle
+    description: Toggle sidebar visibility
+    actions:
+      - type: key
+        value: "F9"
+        delay: 0.8
+
+  - name: zoom_controls
+    description: Zoom in to show zoom controls
+    actions:
+      - type: key
+        value: "ctrl+plus"
+        delay: 0.3
+      - type: key
+        value: "ctrl+plus"
+        delay: 0.3
+      - type: key
+        value: "ctrl+plus"
+        delay: 0.5
+
+  - name: about_dialog
+    description: Open About dialog
+    actions:
+      - type: key
+        value: "F10"
+        delay: 0.5
+      - type: key
+        value: "Up"
+      - type: key
+        value: "Return"
+        delay: 1.0

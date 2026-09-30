@@ -1,0 +1,29 @@
+# Claws Mail — offline email client candidate
+app_name: claws-mail
+binary: claws-mail
+atspi_name: claws-mail
+window_titles:
+  - Claws Mail
+
+env:
+  GTK_MODULES: gail:atk-bridge
+
+interactions:
+  - name: default
+    description: Open Claws Mail to its first-run/offline mailbox UI
+    actions:
+      - type: wait
+        value: "2.5"
+
+  - name: account_wizard
+    description: Keep the first-run account wizard visible if shown
+    actions:
+      - type: wait
+        value: "2.5"
+
+  - name: file_menu
+    description: Open the File menu
+    actions:
+      - type: key
+        value: "alt+f"
+        delay: 1.0

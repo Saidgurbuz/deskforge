@@ -1,0 +1,266 @@
+/* The audit page. Shares app.css for colours and controls; everything here is
+ * about one item filling the screen and a question next to it. */
+
+/* The page chrome. `#bar` and the flex column live in corpus.css for the
+   corpus browser and are not in app.css, so they are repeated here rather than
+   pulling in corpus.css's own three-column `main` and then fighting it. */
+body { margin: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+#bar { display: flex; align-items: center; gap: 14px; padding: 8px 14px;
+       border-bottom: 1px solid var(--rule, #2a2f3a); flex: 0 0 auto; }
+#bar .brand { font-weight: 600; letter-spacing: .2px; }
+#bar .spacer { flex: 1 1 auto; }
+#bar a.plain { color: inherit; opacity: .7; text-decoration: none; font-size: 12px; }
+#bar a.plain:hover { opacity: 1; }
+#bar select { max-width: 190px; }
+
+main {
+  flex: 1 1 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  /* Explicit, because an implicit auto row does not stretch here: the stage
+     collapsed to the 36px of its own toolbar and the canvas got no height at
+     all, which the browser probe now catches by walking the ancestors. */
+  grid-template-rows: minmax(0, 1fr);
+  min-height: 0;
+}
+
+.counter { font-variant-numeric: tabular-nums; font-weight: 600; }
+
+#track {
+  display: flex;
+  gap: 1px;
+  height: 12px;
+  flex: 0 1 320px;
+  overflow: hidden;
+  align-items: stretch;
+}
+#track i {
+  flex: 1 1 2px;
+  min-width: 2px;
+  background: var(--rule, #3a3f4b);
+  border-radius: 1px;
+  cursor: pointer;
+}
+#track i.done { background: #4caf72; }
+#track i.skipped { background: #d8a13a; }
+#track i.here { background: #6ea8fe; }
+
+.saved { font-size: 12px; padding: 2px 8px; border-radius: 10px; }
+.saved.ok { background: #1f3d2b; color: #8fe0ab; }
+.saved.busy { background: #3d3a1f; color: #e0d18f; }
+.saved.err { background: #4a2222; color: #ffb0b0; }
+
+/* ------------------------------------------------------------- the stage */
+
+/* `#board`, not `#stage`: app.css already owns `#stage` on the runs page as an
+   absolutely positioned image layer, and inheriting its `position: absolute`
+   here took this whole column out of flow and collapsed the canvas to zero
+   height - visible only in a browser, which is why the probe walks ancestors. */
+#board { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+
+#viewport {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  background: #14161b;
+  cursor: crosshair;
+}
+#viewport.panning { cursor: grabbing; }
+#viewport.judging { cursor: default; }
+
+#canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+#loupe {
+  position: absolute;
+  pointer-events: none;
+  border: 1px solid #6ea8fe;
+  border-radius: 50%;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, .6);
+  display: none;
+}
+#loupe.on { display: block; }
+
+#board-note {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  max-width: 60%;
+  padding: 6px 10px;
+  border-radius: 4px;
+  background: rgba(20, 22, 27, .88);
+  font-size: 12px;
+  pointer-events: none;
+}
+
+#boardbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 5px 10px;
+  border-top: 1px solid var(--rule, #2a2f3a);
+  font-size: 12px;
+  flex-wrap: wrap;
+}
+#boardbar label { display: flex; align-items: center; gap: 4px; }
+
+#passes { display: flex; gap: 6px; }
+#passes b {
+  padding: 2px 9px;
+  border-radius: 10px;
+  background: #23272f;
+  font-weight: 500;
+  cursor: pointer;
+}
+#passes b.on { background: #2f4d7a; }
+#passes b.done { color: #8fe0ab; }
+
+/* -------------------------------------------------------------- the side */
+
+#side {
+  border-left: 1px solid var(--rule, #2a2f3a);
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 12px 40px;
+}
+#side h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; margin: 14px 0 6px; }
+
+#options { display: flex; flex-direction: column; gap: 5px; }
+#options button {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  text-align: left;
+  padding: 7px 9px;
+  font-size: 13px;
+}
+#options button.picked { outline: 2px solid #6ea8fe; }
+#options button.was { background: #2a3547; }
+#options kbd { min-width: 17px; text-align: center; }
+
+#pass-extra { margin-top: 8px; font-size: 12px; }
+#pass-extra .hint {
+  margin: 8px 0 0;
+  padding: 7px 9px;
+  border-left: 2px solid #d8a13a;
+  background: #2b2718;
+  color: #e8d9a8;
+}
+
+#element-table td, #fact-table td, #automated-body td, #provenance-body td {
+  font-size: 12px;
+  padding: 2px 6px 2px 0;
+  vertical-align: top;
+  word-break: break-word;
+}
+#element-table td:first-child, #fact-table td:first-child { color: var(--muted, #98a0ae); white-space: nowrap; }
+
+#answer-list { display: flex; flex-direction: column; gap: 3px; font-size: 12px; }
+#answer-list .a { display: flex; gap: 6px; }
+#answer-list .a span:first-child { color: var(--muted, #98a0ae); flex: 0 0 120px; }
+#answer-list .a b { font-weight: 500; }
+
+.tiny { font-size: 11px; }
+.row.buttons { display: flex; gap: 6px; margin-top: 10px; }
+
+/* --------------------------------------------------------------- help */
+
+#help {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+/* Without this the `hidden` attribute does nothing: the browser hides [hidden]
+   with `display: none` from its own stylesheet, and any author `display` rule
+   outranks it. The sheet was therefore visible from page load and neither
+   `close` nor Escape could put it away. */
+#help[hidden] { display: none; }
+#help .sheet {
+  background: #1b1e25;
+  border: 1px solid var(--rule, #2a2f3a);
+  border-radius: 6px;
+  padding: 18px 22px;
+  max-width: 640px;
+  max-height: 82vh;
+  overflow-y: auto;
+}
+#help table td { padding: 2px 12px 2px 0; font-size: 13px; }
+#help ol { padding-left: 18px; font-size: 13px; line-height: 1.55; }
+#help li { margin-bottom: 6px; }
+
+#screentag-body pre {
+  font-size: 11px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 280px;
+  overflow-y: auto;
+  margin: 4px 0 0;
+}
+
+/* ------------------------------------------------------------ sweep mode */
+
+#options button.primary {
+  background: #2f4d7a;
+  border-color: #4a6f9f;
+  font-weight: 600;
+}
+
+.sweepstat p { margin: 6px 0 10px; }
+
+#answer-list .a.flagged { cursor: pointer; }
+#answer-list .a.flagged b { color: #ff9d9d; }
+
+.screenq {
+  margin: 10px 0 0;
+  padding-top: 8px;
+  border-top: 1px solid var(--rule, #2a2f3a);
+}
+.screenq > span { display: block; margin-bottom: 4px; }
+.screenq .opts { display: flex; gap: 4px; flex-wrap: wrap; }
+.screenq .opts button { padding: 3px 7px; font-size: 12px; gap: 5px; }
+.screenq .opts button.was { background: #2a3547; outline: 1px solid #6ea8fe; }
+
+#board-note.marking {
+  border-left: 2px solid #ff6b6b;
+  background: rgba(45, 22, 22, .92);
+}
+#viewport.marking { cursor: cell; }
+
+/* ------------------------------------------------------ instruction audit */
+
+.instruction {
+  margin: 10px 0;
+  padding: 10px 12px;
+  border-left: 3px solid #6ea8fe;
+  background: #1c2431;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.verdict {
+  margin: 8px 0;
+  padding: 6px 9px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+.verdict.hit { background: #1f3d2b; color: #8fe0ab; }
+.verdict.miss { background: #4a2222; color: #ffb0b0; }
+
+.qprogress { display: flex; gap: 4px; margin: 10px 0; }
+.qprogress i {
+  width: 22px; height: 4px; border-radius: 2px;
+  background: var(--rule, #3a3f4b); cursor: pointer;
+}
+.qprogress i.done { background: #4caf72; }
+.qprogress i.here { background: #6ea8fe; }
+
+.accepts { margin-top: 12px; font-size: 12px; }
+.accepts p { margin: 0 0 5px; }
+.accepts .a { display: flex; gap: 6px; padding: 1px 0; }
+.accepts .a span:first-child { color: var(--muted, #98a0ae); flex: 0 0 130px; }
+.accepts .a b { font-weight: 500; }

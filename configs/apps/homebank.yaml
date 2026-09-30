@@ -1,0 +1,32 @@
+# HomeBank — personal finance / budgeting candidate
+app_name: homebank
+binary: homebank
+atspi_name: homebank
+args:
+  - ${DESKFORGE_ROOT}/tools/extracted/usr/share/homebank/datas/example.xhb
+window_titles:
+  - HomeBank
+
+env:
+  GTK_MODULES: gail:atk-bridge
+
+interactions:
+  - name: default
+    description: Open the bundled HomeBank sample book
+    actions:
+      - type: wait
+        value: "2.5"
+
+  - name: statistics
+    description: Open the statistics/report view shortcut
+    actions:
+      - type: key
+        value: "ctrl+r"
+        delay: 1.0
+
+  - name: file_menu
+    description: Open the File menu
+    actions:
+      - type: key
+        value: "alt+f"
+        delay: 1.0

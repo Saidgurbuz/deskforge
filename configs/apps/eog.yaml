@@ -1,0 +1,71 @@
+# Eye of GNOME — image viewer
+app_name: eog
+binary: eog
+atspi_name: eog
+args:
+  # A photograph, deliberately not a screenshot. This used to open
+  # help/de/eog/figures/plugins-all.png, which is a German documentation
+  # *screenshot of a preferences dialog* - so the image viewer displayed a
+  # picture of UI. Its widgets are pixels, not objects: AT-SPI cannot expose
+  # them, every audit read the region as unannotated content, and a model
+  # trained on it would be shown dialog-shaped pixels that carry no
+  # annotation. A photo makes the image an image.
+  - ${DESKFORGE_ROOT}/tools/extracted/usr/share/backgrounds/evergreen-dark1.jpg
+
+interactions:
+  - name: default
+    description: Default empty viewer
+    actions:
+      - type: wait
+        value: "1.5"
+
+  - name: open_dialog
+    description: Open file dialog
+    actions:
+      - type: key
+        value: "ctrl+o"
+        delay: 1.0
+
+  - name: properties
+    description: Open image properties
+    actions:
+      - type: key
+        value: "alt+Return"
+        delay: 0.8
+
+  - name: about_dialog
+    description: Open About dialog
+    actions:
+      - type: key
+        value: "F10"
+        delay: 0.5
+      - type: key
+        value: "Up"
+      - type: key
+        value: "Return"
+        delay: 1.0
+
+chains:
+  - name: image_progressive
+    description: Capture the loaded image, then properties, then the image gallery
+    steps:
+      - name: image_loaded
+        description: Deterministic sample image loaded in the viewer
+        actions:
+          - type: wait
+            value: "2.0"
+        capture: true
+      - name: properties_open
+        description: Properties dialog opened for the loaded image
+        actions:
+          - type: key
+            value: "alt+Return"
+            delay: 1.0
+        capture: true
+      - name: gallery_toggle
+        description: Toggle the image gallery to expose a second stable layout state
+        actions:
+          - type: key
+            value: "ctrl+F9"
+            delay: 1.5
+        capture: true

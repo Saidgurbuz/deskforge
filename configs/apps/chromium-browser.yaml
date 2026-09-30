@@ -1,0 +1,216 @@
+# Chromium browser
+app_name: chromium-browser
+binary: chromium-browser
+atspi_name: Chromium
+window_titles: ["Chromium"]
+args:
+  - "--no-sandbox"
+  - "--disable-gpu"
+  - "--disable-dev-shm-usage"
+  - "--no-first-run"
+  - "--no-default-browser-check"
+  - "--test-type"
+  - "--password-store=basic"
+  - "--user-data-dir=/tmp/session_chromium_profile"
+  - "--force-renderer-accessibility"
+  - "about:blank"
+env:
+  ACCESSIBILITY_ENABLED: "1"
+  GNOME_ACCESSIBILITY: "1"
+
+interactions:
+  - name: default
+    description: Open browser window
+    actions:
+      - type: wait
+        value: "2.0"
+
+  - name: new_tab
+    description: Open additional tab
+    actions:
+      - type: key
+        value: "ctrl+t"
+        delay: 1.0
+
+chains:
+  - name: python_progressive
+    description: Load python.org, scroll, then follow a visible page control heuristically
+    steps:
+      - name: python_home
+        description: Load the Python homepage
+        actions:
+          - type: key
+            value: "ctrl+l"
+            delay: 0.3
+          - type: type_text
+            value: "https://www.python.org/"
+            delay: 0.2
+          - type: key
+            value: "Return"
+            delay: 0.3
+          - type: wait
+            value: "8.0"
+        capture: true
+      - name: scrolled
+        description: Scroll down to expose different visible controls and content
+        actions:
+          - type: key
+            value: "Page_Down"
+            delay: 0.8
+          - type: key
+            value: "Page_Down"
+            delay: 1.0
+        capture: true
+      - name: heuristic_follow
+        description: Click a visible page control/link chosen from the current AT-SPI snapshot
+        actions:
+          - type: heuristic_click
+            value: "random|41"
+            delay: 4.0
+        capture: true
+
+  - name: docs_dual_window_scatter
+    description: Open a second Chromium window, load docs.python.org, then scatter the windows
+    steps:
+      - name: python_home
+        actions:
+          - type: key
+            value: "ctrl+l"
+            delay: 0.3
+          - type: type_text
+            value: "https://www.python.org/"
+            delay: 0.2
+          - type: key
+            value: "Return"
+            delay: 0.3
+          - type: wait
+            value: "8.0"
+          - type: window_resize_active
+            value: "700|760"
+            delay: 0.3
+          - type: window_move_active
+            value: "210|120"
+            delay: 0.6
+        capture: true
+      - name: docs_window_scattered
+        actions:
+          - type: key
+            value: "ctrl+n"
+            delay: 1.0
+          - type: key
+            value: "ctrl+l"
+            delay: 0.3
+          - type: type_text
+            value: "https://docs.python.org/3/"
+            delay: 0.2
+          - type: key
+            value: "Return"
+            delay: 0.3
+          - type: wait
+            value: "8.0"
+          - type: window_resize_active
+            value: "760|720"
+            delay: 0.3
+          - type: window_move_active
+            value: "980|170"
+            delay: 0.6
+          - type: randomize_layout
+            value: "cascade"
+            delay: 0.8
+        capture: true
+
+scene_templates:
+  - type: chromium_live_windows
+    name: single_python_downloads_scrolled
+    description: Open python.org downloads and scroll to expose below-the-fold content
+    settle_seconds: 8.0
+    final_wait_seconds: 1.0
+    windows:
+      - url: "https://www.python.org/downloads/"
+        x: 250
+        y: 100
+        width: 980
+        height: 780
+        post_actions:
+          - type: key
+            value: "Page_Down"
+            delay: 0.8
+          - type: key
+            value: "Page_Down"
+            delay: 1.0
+
+  - type: chromium_live_windows
+    name: split_python_docs
+    description: Open python.org in left window and docs.python.org in right window
+    settle_seconds: 8.0
+    final_wait_seconds: 0.8
+    windows:
+      - url: "https://www.python.org/"
+        x: 230
+        y: 90
+        width: 660
+        height: 760
+      - url: "https://docs.python.org/3/"
+        x: 980
+        y: 150
+        width: 720
+        height: 730
+
+  - type: chromium_live_windows
+    name: split_python_pep8
+    description: Open python.org on the left and PEP 8 on the right
+    settle_seconds: 8.0
+    final_wait_seconds: 1.0
+    windows:
+      - url: "https://www.python.org/"
+        x: 230
+        y: 90
+        width: 660
+        height: 760
+      - url: "https://peps.python.org/pep-0008/"
+        x: 980
+        y: 150
+        width: 720
+        height: 730
+        post_actions:
+          - type: key
+            value: "Page_Down"
+            delay: 0.9
+
+  - type: chromium_live_windows
+    name: split_docs_tutorial
+    description: Open docs home on the left and tutorial page on the right
+    settle_seconds: 8.0
+    final_wait_seconds: 1.0
+    windows:
+      - url: "https://docs.python.org/3/"
+        x: 230
+        y: 90
+        width: 660
+        height: 760
+      - url: "https://docs.python.org/3/tutorial/"
+        x: 980
+        y: 150
+        width: 720
+        height: 730
+        post_actions:
+          - type: key
+            value: "Page_Down"
+            delay: 0.9
+
+  - type: chromium_live_windows
+    name: overlap_python_docs
+    description: Open python.org behind and docs.python.org in a partially overlapping front window
+    settle_seconds: 8.0
+    final_wait_seconds: 1.0
+    windows:
+      - url: "https://www.python.org/"
+        x: 220
+        y: 90
+        width: 800
+        height: 760
+      - url: "https://docs.python.org/3/"
+        x: 700
+        y: 250
+        width: 860
+        height: 720

@@ -1,0 +1,55 @@
+# DeskShot Pipeline Configuration
+
+# Virtual display settings
+display:
+  display_number: 99
+  width: 1920
+  height: 1080
+  depth: 24
+
+# Desktop environment: "none", "metacity", or "xfce"
+desktop_env: xfce
+
+# Theme settings (used with xfce desktop_env)
+theme:
+  gtk_theme: Adwaita
+  icon_theme: Adwaita
+  wm_theme: Default
+  cursor_theme: Adwaita
+  wallpaper: ""
+  wallpaper_seed: 0
+  font: "Sans 10"
+  desktop_style: linux
+  panel_variant: ""
+
+desktop_fixture:
+  enabled: true
+  seed: 0
+  profile: balanced
+  num_folders: 0
+  num_files: 0
+
+# Timeouts
+startup_timeout: 5.0
+app_launch_timeout: 10.0
+xfce_startup_timeout: 15.0
+
+# Output paths (relative to project root)
+output_dir: data/raw
+viz_dir: data/viz
+apps_config_dir: configs/apps
+
+# Filtering thresholds (match webshot defaults)
+min_box_size: 4
+max_box_size: 1000
+iou_threshold: 0.95
+containment_threshold: 0.98
+
+# Quality thresholds
+min_elements: 5
+min_type_diversity: 3
+min_coverage_ratio: 0.10
+min_tree_depth: 3
+occlusion_clipping: true
+occlusion_partial_clipping: true
+occlusion_min_visible_ratio: 0.15

@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>DeskShot audit - self check</title>
+<style>
+  body { margin: 0; font: 13px/1.5 -apple-system, "Segoe UI", Roboto, sans-serif;
+         background: #14171c; color: #d8dee9; }
+  header { padding: 10px 14px; border-bottom: 1px solid #2f3846; }
+  #summary { font-weight: 600; }
+  #summary.pass { color: #6fcf7f; }
+  #summary.fail { color: #e07a7a; }
+  ol { margin: 0; padding: 8px 14px 8px 34px; }
+  li.pass::marker { color: #6fcf7f; }
+  li.fail { color: #e07a7a; }
+  li.skip { color: #8b95a5; }
+  .detail { color: #8b95a5; }
+  #frame { width: 1400px; height: 900px; border: 1px solid #2f3846; }
+</style>
+</head>
+<body>
+
+<header>
+  <div id="summary">running…</div>
+  <div class="detail">Drives /audit in the frame below and checks what it did.
+    It answers a whole item, so it only makes sense against a scratch campaign.</div>
+</header>
+<ol id="rows"></ol>
+<iframe id="frame"></iframe>
+
+<script>
+/* A self-driving smoke test for the audit page.
+ *
+ * Same trick as probe.html: the page is served from /static/, so it is
+ * same-origin with the app and can reach into the frame. What needs a real
+ * browser here is not the request layer - tests/test_audit_app.py covers that -
+ * but the parts that only exist in a DOM: that the blind pass really hides the
+ * boxes, that one keystroke saves an answer and advances, that the element pass
+ * walks the sampled keys, and that finishing an item marks it done.
+ */
+(function () {
+"use strict";
+
+var params = new URLSearchParams(location.search);
+var TIMEOUT = Number(params.get("timeout") || 25000);
+var CAMPAIGN = params.get("campaign") || "";
+/* `?src=index.html` drives an offline bundle instead of the live page. The
+   bundle loads the same audit.js, so the same scenario has to pass there. */
+var SRC = params.get("src") || "";
+var pass = 0, fail = 0, skip = 0;
+
+function record(state, name, detail) {
+  var li = document.createElement("li");
+  li.className = state;
+  li.textContent = state.toUpperCase() + "  " + name;
+  if (detail) {
+    var span = document.createElement("span");
+    span.className = "detail";
+    span.textContent = "  — " + detail;
+    li.appendChild(span);
+  }
+  document.getElementById("rows").appendChild(li);
+  if (state === "pass") pass += 1;
+  else if (state === "fail") fail += 1;
+  else skip += 1;
+}
+
+function check(name, condition, detail) {
+  record(condition ? "pass" : "fail", name, condition ? "" : detail || "");
+  return !!condition;
+}
+
+function finish() {
+  var summary = document.getElementById("summary");
+  summary.textContent = "PROBE pass=" + pass + " fail=" + fail + " skip=" + skip;
+  summary.className = fail ? "fail" : "pass";
+}
+
+var win, doc, deadline = Date.now() + TIMEOUT;
+
+function until(what, test) {
+  return new Promise(function (resolve, reject) {
+    (function poll() {
+      var value;
+      try { value = test(); } catch (error) { value = null; }
+      if (value) return resolve(value);
+      if (Date.now() > deadline) return reject(new Error("timed out waiting for " + what));
+      setTimeout(poll, 60);
+    })();
+  });
+}
+
+function settled() {
+  return until("saves to settle", function () {
+    return win.st && win.st.saving === 0 && win.st.state;
+  });
+}
+
+/* On `document.body`, not on `window`: a real keypress starts at the focused
+ * element and bubbles, and dispatching straight at `window` would pass even if
+ * the handler were attached somewhere that never sees a real key. */
+function key(k, shift) {
+  doc.body.dispatchEvent(new win.KeyboardEvent("keydown", {
+    key: k, shiftKey: !!shift, bubbles: true, cancelable: true
+  }));
+}
+
+function keyFor(questionId, value) {
+  var question = (win.st.rubric.questions || []).filter(function (q) {
+    return q.id === questionId;
+  })[0];
+  if (!question) return null;
+  var option = (question.options || []).filter(function (o) { return o.value === value; })[0];
+  return option ? option.key : null;
+}
+
+/* Where a collapsed stage actually collapsed. A canvas with no height is the
+ * failure this page exists to catch, and knowing which ancestor lost its
+ * height is the difference between a five-minute fix and an afternoon. */
+function chain(node) {
+  var parts = [];
+  while (node && node.tagName !== "HTML") {
+    var style = win.getComputedStyle(node);
+    parts.push((node.id || node.tagName.toLowerCase()) + " " +
+               Math.round(node.clientWidth) + "x" + Math.round(node.clientHeight) +
+               " [" + style.display + "/" + style.height + "]");
+    node = node.parentElement;
+  }
+  return parts.join(" < ");
+}
+
+/* Click the middle of a known element, in client coordinates.
+ *
+ * Clicking a fraction of the canvas assumes something is there, which is true
+ * of a real capture - every pixel belongs to some element - and was not true of
+ * the test fixture. Aiming at an element also checks the thing that matters:
+ * that clicking a box selects *that* box. */
+function clickElement(element) {
+  var rects = (element.visible_fragments && element.visible_fragments.length)
+    ? element.visible_fragments : [element.rect];
+  var rect = rects[0];
+  var canvas = doc.getElementById("canvas");
+  var box = canvas.getBoundingClientRect();
+  var view = win.st.view;
+  canvas.dispatchEvent(new win.MouseEvent("click", {
+    clientX: box.left + view.x + (rect.x + rect.w / 2) * view.scale,
+    clientY: box.top + view.y + (rect.y + rect.h / 2) * view.scale,
+    bubbles: true, cancelable: true
+  }));
+  return element.key;
+}
+
+/* The smallest element on the screen: the one a smallest-first hit test is
+ * guaranteed to return, so "clicking it selects it" is a real assertion. */
+function smallestElement() {
+  var best = null, bestArea = Infinity;
+  win.st.elements.forEach(function (element) {
+    var rects = (element.visible_fragments && element.visible_fragments.length)
+      ? element.visible_fragments : (element.rect ? [element.rect] : []);
+    rects.forEach(function (rect) {
+      var area = Math.max(1, rect.w) * Math.max(1, rect.h);
+      if (area < bestArea) { best = element; bestArea = area; }
+    });
+  });
+  return best;
+}
+
+function openItemBack(index) {
+  win.openItem(index);
+  return until("the swept item's own state to load", function () {
+    return win.st.stateIndex === index && win.st.state;
+  });
+}
+
+function clickCanvas(fraction) {
+  var canvas = doc.getElementById("canvas");
+  var box = canvas.getBoundingClientRect();
+  var clientX = box.left + box.width * (fraction || 0.5);
+  var clientY = box.top + box.height * (fraction || 0.5);
+  canvas.dispatchEvent(new win.MouseEvent("click", {
+    clientX: clientX, clientY: clientY, bubbles: true, cancelable: true
+  }));
+  return {
+    x: (clientX - box.left - win.st.view.x) / win.st.view.scale,
+    y: (clientY - box.top - win.st.view.y) / win.st.view.scale
+  };
+}
+
+var frame = document.getElementById("frame");
+frame.addEventListener("load", function () {
+  if (!frame.src) return;
+  win = frame.contentWindow;
+  doc = frame.contentDocument;
+  run().catch(function (error) {
+    record("fail", "scenario", error.message);
+  }).then(finish);
+});
+frame.src = SRC || ("/audit" + (CAMPAIGN ? "#" + CAMPAIGN + "|0" : ""));
+
+function run() {
+  return until("the queue to load", function () {
+    return win.st && win.st.campaign && win.st.item && win.st.elements.length;
+  }).then(function () {
+    if (win.st.kind === "instruction") return runInstruction();
+    return win.st.mode === "sweep" ? runSweep() : runSample();
+  });
+}
+
+/* An instruction campaign. The pass that matters is the first one: the rater is
+ * shown the instruction and no box, and what they click is scored against the
+ * recorded target by the server. That is the only judgement here the machine
+ * can check for itself, so the probe checks it end to end. */
+function runInstruction() {
+  check("the kind is instruction", win.st.kind === "instruction");
+  if (win.st.grounding) return runInstructionGrounded();
+  check("it goes straight to the questions", win.st.pass === "judge", win.st.pass);
+  check("the target is on screen from the start", win.st.revealedTarget === true);
+  check("the questions start collapsed", win.st.expanded === false);
+  check("the item carries an instruction", !!win.st.item.instruction,
+        String(win.st.item.instruction).slice(0, 60));
+  var spec = win.st.item.target || {};
+  check("and the box it names", !!spec.bbox_px && spec.bbox_px.length === 4,
+        JSON.stringify(spec.bbox_px));
+
+  var first = win.st.index;
+  return until("the screenshot to decode", function () { return win.st.img; }).then(function () {
+    var box = doc.getElementById("canvas").getBoundingClientRect();
+    check("the stage has a size", box.width > 100 && box.height > 100,
+          Math.round(box.width) + "x" + Math.round(box.height));
+
+    /* The common case: one key accepts the sample outright. */
+    key("Enter");
+    return settled();
+  }).then(function () {
+    return until("the accepted item to be recorded", function () {
+      return win.st.progress.done >= 1;
+    });
+  }).then(function () {
+    check("Enter accepts the sample in one keystroke", win.st.progress.done >= 1);
+    check("and moves on to the next item", win.st.index !== first,
+          first + " -> " + win.st.index);
+    return win.get("/api/audit/state?campaign=" +
+                   encodeURIComponent(win.st.campaign) + "&indices=" + first);
+  }).then(function (body) {
+    var state = body.states[String(first)];
+    var screen = state.screen || {};
+    check("it recorded every question, not just one",
+          Object.keys(screen).length === 5, Object.keys(screen).join(","));
+    check("each at the value the rubric marks as 'nothing wrong'",
+          screen.instruction_ok.value === "good" &&
+          screen.target_match.value === "match" &&
+          screen.unique.value === "one" &&
+          screen.target_visible.value === "visible" &&
+          screen.effect.value === "match",
+          JSON.stringify(screen).slice(0, 140));
+    check("and marked the item done",
+          !!(state.item && state.item.status === "done"),
+          JSON.stringify(state.item));
+    check("no grounding click was invented", !state.ground);
+
+    /* The other case: say what is wrong, and the detail opens on it. */
+    key(keyFor("unique", "several"));
+    return settled();
+  }).then(function () {
+    check("a rubric key opens the detail", win.st.expanded === true);
+    var answer = (win.st.state.screen || {}).unique;
+    check("and answers the question it belongs to",
+          !!answer && answer.value === "several", JSON.stringify(answer));
+    check("it did not accept the rest behind my back",
+          Object.keys(win.st.state.screen).length === 1,
+          Object.keys(win.st.state.screen).join(","));
+    key("o");
+    check("o asks for the screen after the click", win.st.showAfter === true);
+    check("neighbouring items were prefetched",
+          Object.keys(win.st.itemCache).length > 1);
+    return null;
+  });
+}
+
+/* Only when the queue was drawn with --with-grounding. */
+function runInstructionGrounded() {
+  check("it starts on the grounding pass", win.st.pass === "ground", win.st.pass);
+  check("the target is not revealed yet", win.st.revealedTarget === false);
+  check("the item carries an instruction", !!win.st.item.instruction,
+        String(win.st.item.instruction).slice(0, 60));
+  var spec = win.st.item.target || {};
+  check("and a recorded box to score against",
+        !!spec.bbox_px && spec.bbox_px.length === 4, JSON.stringify(spec.bbox_px));
+
+  return until("the screenshot to decode", function () { return win.st.img; }).then(function () {
+    var canvas = doc.getElementById("canvas");
+    var box = canvas.getBoundingClientRect();
+    check("the stage has a size", box.width > 100 && box.height > 100,
+          Math.round(box.width) + "x" + Math.round(box.height) + " | " + chain(canvas));
+
+    /* Click the middle of the recorded target: the server must score that a
+     * hit, and if it does not the geometry or the frame is wrong. */
+    var view = win.st.view;
+    canvas.dispatchEvent(new win.MouseEvent("click", {
+      clientX: box.left + view.x + (spec.bbox_px[0] + spec.bbox_px[2]) / 2 * view.scale,
+      clientY: box.top + view.y + (spec.bbox_px[1] + spec.bbox_px[3]) / 2 * view.scale,
+      bubbles: true, cancelable: true
+    }));
+    return until("the guess to register", function () { return win.st.guess; });
+  }).then(function () {
+    check("clicking places a guess", !!win.st.guess, JSON.stringify(win.st.guess));
+    key("Enter");
+    return settled();
+  }).then(function () {
+    var ground = win.st.state.ground;
+    check("the click is recorded", !!ground, JSON.stringify(ground));
+    check("the server scored it against the recorded box",
+          ground && ground.in_bbox === true, JSON.stringify(ground));
+    check("and measured how far off it was",
+          ground && typeof ground.distance_px === "number", JSON.stringify(ground));
+    check("the target is revealed after answering", win.st.revealedTarget === true);
+    key("Enter");
+    return until("the judging pass", function () { return win.st.pass === "judge"; });
+  }).then(function () {
+    check("Enter moves on to the questions", win.st.pass === "judge");
+    key(keyFor("instruction_ok", "good"));
+    return settled();
+  }).then(function () {
+    var answer = win.st.state.screen.instruction_ok;
+    check("one keystroke answers a question", !!answer && answer.value === "good",
+          JSON.stringify(answer));
+    key(keyFor("target_match", "match"));
+    return settled();
+  }).then(function () {
+    key(keyFor("unique", "one"));
+    return settled();
+  }).then(function () {
+    key(keyFor("target_visible", "visible"));
+    return settled();
+  }).then(function () {
+    check("four answers are recorded",
+          Object.keys(win.st.state.screen).length === 4,
+          Object.keys(win.st.state.screen).join(","));
+    key("o");
+    check("o asks for the screen after the click", win.st.showAfter === true);
+    key(keyFor("effect", "match"));
+    return settled();
+  }).then(function () {
+    check("the optional question is answerable too",
+          !!win.st.state.screen.effect);
+    check("the item is marked done",
+          !!(win.st.state.item && win.st.state.item.status === "done"),
+          JSON.stringify(win.st.state.item));
+    check("progress counts it", win.st.progress.done >= 1);
+    check("neighbouring items were prefetched",
+          Object.keys(win.st.itemCache).length > 1);
+    return null;
+  });
+}
+
+/* Sweep mode: the whole annotation is on screen and only the exceptions are
+ * asked for, so what has to be true is that clicking reaches an element,
+ * flagging it writes a row, and declaring the rest correct records a census
+ * rather than a sample. */
+function runSweep() {
+  check("the mode is sweep", win.st.mode === "sweep");
+  check("its only pass is the sweep", win.st.pass === "sweep", win.st.pass);
+  check("boxes are on from the start", win.st.opts.boxes === true);
+  check("nothing is selected yet", win.st.selected === null);
+  check("the track has one tick per item",
+        doc.getElementById("track").children.length === win.st.count);
+
+  var flagKey = keyFor("element", "wrong_class");
+  return until("the screenshot to decode", function () { return win.st.img; }).then(function () {
+    check("the screenshot decoded", !!win.st.img);
+    var canvas = doc.getElementById("canvas");
+    var box = canvas.getBoundingClientRect();
+    check("the stage has a size", box.width > 100 && box.height > 100,
+          Math.round(box.width) + "x" + Math.round(box.height) + " | " + chain(canvas));
+
+    var target = smallestElement();
+    check("the capture has something to click", !!target);
+    var wanted = clickElement(target);
+    return until("an element to be selected", function () { return win.st.selected; })
+      .then(function () { return wanted; });
+  }).then(function (wanted) {
+    check("clicking a box selects that box", win.st.selected === wanted,
+          win.st.selected + " vs " + wanted);
+    check("and the panel shows what it claims",
+          doc.getElementById("element").hidden === false);
+    key(flagKey);
+    return settled();
+  }).then(function () {
+    var flags = win.st.flagged[win.st.selected] || [];
+    check("a flag key records the element as wrong",
+          flags.indexOf("wrong_class") >= 0, JSON.stringify(flags));
+    var stored = (win.st.state.elements || {})[win.st.selected];
+    check("the row says it came from a sweep, not a sample",
+          !!stored && stored.values.indexOf("wrong_class") >= 0, JSON.stringify(stored));
+    key(keyFor("element", "ok"));
+    return settled();
+  }).then(function () {
+    check("a clears the flag again",
+          !win.st.flagged[win.st.selected], JSON.stringify(win.st.flagged));
+    key("Escape");
+    check("Escape deselects", win.st.selected === null);
+
+    key("m");
+    check("m arms marking what is missing", win.st.marking === true);
+    clickElement(smallestElement());
+    return until("a missing mark to save", function () {
+      return (win.st.state.missed || []).length === 1;
+    });
+  }).then(function () {
+    check("a missing mark is saved as it is made",
+          (win.st.state.missed || []).length === 1);
+    key("m");
+    check("m disarms it", win.st.marking === false);
+
+    var total = win.st.elements.length;
+    var swept = win.st.index;
+    key("Enter");
+    /* Move on immediately. The sweep row and the done row used to be two
+     * requests, and doing exactly this put the done row on the next item. */
+    key("ArrowRight");
+    return settled().then(function () {
+      return win.get("/api/audit/state?campaign=" +
+                     encodeURIComponent(win.st.campaign) + "&indices=" + swept);
+    }).then(function (body) {
+      var state = body.states[String(swept)];
+      check("the done row stayed on the screen that was swept",
+            !!(state.item && state.item.status === "done"),
+            JSON.stringify(state.item));
+      check("even though the rater had already moved on",
+            win.st.index !== swept, swept + " -> " + win.st.index);
+      return openItemBack(swept).then(function () { return total; });
+    });
+  }).then(function (total) {
+    var sweep = win.st.state.sweep;
+    check("the sweep covers every element on the screen",
+          sweep.n_elements === total, sweep.n_elements + " of " + total);
+    check("and declares the unflagged ones correct",
+          sweep.declared_correct === total, JSON.stringify(sweep.declared_correct));
+    check("it records the screen's class census",
+          !!sweep.census && Object.keys(sweep.census).length > 0,
+          JSON.stringify(sweep.census).slice(0, 120));
+    var counted = Object.keys(sweep.census).reduce(function (sum, key) {
+      return sum + sweep.census[key];
+    }, 0);
+    check("the census sums to the element count", counted === total,
+          counted + " vs " + total);
+    check("the item is marked done",
+          !!(win.st.state.item && win.st.state.item.status === "done"),
+          JSON.stringify(win.st.state.item));
+    check("progress counts it", win.st.progress.done >= 1,
+          JSON.stringify(win.st.progress.done));
+    check("neighbouring items were prefetched",
+          Object.keys(win.st.itemCache).length > 1,
+          Object.keys(win.st.itemCache).join(","));
+    return null;
+  });
+}
+
+function runSample() {
+  return until("the queue to load", function () {
+    return win.st && win.st.campaign && win.st.item && win.st.elements.length;
+  }).then(function () {
+    check("a campaign loaded", !!win.st.campaign, "no campaign");
+    check("the item has elements", win.st.elements.length > 0);
+    check("sampled elements resolve", win.st.sampled.length > 0,
+          "sampled: " + JSON.stringify(win.st.sampled));
+    check("the first pass is the blind one", win.st.pass === "missed", win.st.pass);
+    check("boxes are hidden while blind",
+          win.st.pass === "missed" && !win.st.revealed);
+    check("the track has one tick per item",
+          doc.getElementById("track").children.length === win.st.count);
+    check("the rubric arrived", !!(win.st.rubric && win.st.rubric.questions.length));
+
+    return until("the screenshot to decode", function () { return win.st.img; });
+  }).then(function () {
+    check("the screenshot decoded", !!win.st.img,
+          "no image");
+    check("the frame is downscaled, not the original",
+          win.st.img.naturalWidth <= 2048, String(win.st.img.naturalWidth));
+
+    var canvas = doc.getElementById("canvas");
+    var box = canvas.getBoundingClientRect();
+    check("the stage has a size",
+          box.width > 100 && box.height > 100 && win.st.natural.w > 0,
+          "canvas " + Math.round(box.width) + "x" + Math.round(box.height) +
+          "  natural " + win.st.natural.w + "x" + win.st.natural.h +
+          "  scale " + win.st.view.scale.toFixed(3) + "  |  " + chain(canvas));
+    /* A pass-2 key pressed during the blind pass answers nothing, and a key
+     * that silently does nothing reads as a broken page. */
+    key(keyFor("screen_usable", "good"));
+    var note = doc.getElementById("board-note").textContent;
+    check("a key for a later pass says which pass it belongs to",
+          note.indexOf("pass 2") >= 0, note || "(silent)");
+    check("and it did not secretly answer anything",
+          Object.keys(win.st.state.screen || {}).length === 0);
+
+    var aimed = clickCanvas(0.5);
+    return until("a missed point to register (aimed at " +
+                 Math.round(aimed.x) + "," + Math.round(aimed.y) + ")", function () {
+      return win.st.missed.length === 1;
+    });
+  }).then(function () {
+    check("clicking marks a missed point", win.st.missed.length === 1);
+    clickCanvas(0.5);
+    return until("the point to be removed", function () {
+      return win.st.missed.length === 0;
+    });
+  }).then(function () {
+    check("clicking it again removes it", win.st.missed.length === 0);
+    key("Enter");
+    return settled();
+  }).then(function () {
+    check("committing the blind pass reveals the boxes", win.st.revealed === true);
+    check("the blind pass is recorded",
+          !!(win.st.state.item && win.st.state.item.missed_at),
+          JSON.stringify(win.st.state.item));
+    key("Enter");
+    return until("the screen pass", function () { return win.st.pass === "screen"; });
+  }).then(function () {
+    check("continuing moves to the screen pass", win.st.pass === "screen");
+    key(keyFor("screen_usable", "good"));
+    return settled();
+  }).then(function () {
+    var answer = win.st.state.screen.screen_usable;
+    check("one keystroke saved a screen answer", !!answer && answer.value === "good",
+          JSON.stringify(answer));
+    check("it recorded how long the answer took", !!(answer && answer.dwell_ms >= 0));
+    check("and advanced to the next question", win.st.question === 1, String(win.st.question));
+
+    key(keyFor("screen_missing_region", "no"));
+    return settled();
+  }).then(function () {
+    key(keyFor("screen_occlusion", "ok"));
+    return settled();
+  }).then(function () {
+    check("finishing the screen questions moves to the elements",
+          win.st.pass === "elements", win.st.pass);
+    check("and zooms in on the first element", win.st.view.scale > 0);
+    var judged = Object.keys(win.st.state.elements || {}).length;
+    check("no element judged yet", judged === 0, String(judged));
+    return answerElements(0);
+  }).then(function () {
+    var judged = Object.keys(win.st.state.elements || {}).length;
+    check("every sampled element was judged", judged === win.st.sampled.length,
+          judged + " of " + win.st.sampled.length);
+    check("the item is marked done",
+          !!(win.st.state.item && win.st.state.item.status === "done"),
+          JSON.stringify(win.st.state.item));
+    var first = win.st.state.elements[win.st.sampled[0]];
+    check("an element answer carries its flags and class",
+          !!first && first.values && first.values[0] === "ok",
+          JSON.stringify(first));
+    check("progress counts the finished item", win.st.progress.done >= 1,
+          JSON.stringify(win.st.progress));
+    check("neighbouring items were prefetched",
+          Object.keys(win.st.itemCache).length > 1,
+          Object.keys(win.st.itemCache).join(","));
+
+    /* Toggles must be reachable even when the rubric has claimed the letter. */
+    var before = win.st.opts.boxes;
+    key("b", true);
+    check("shift+B toggles the boxes", win.st.opts.boxes !== before);
+    key("f", true);
+    check("shift+F refits", win.st.fitted === true);
+
+    /* The help sheet is `hidden` in the markup and styled `display: flex`, and
+     * an author display rule outranks the browser's own `[hidden]` rule - so
+     * without a `#help[hidden]` guard the sheet is visible from page load and
+     * neither close nor Escape can put it away. Checking the computed style
+     * rather than the attribute is the whole point. */
+    var help = doc.getElementById("help");
+    check("the help sheet starts hidden",
+          win.getComputedStyle(help).display === "none",
+          win.getComputedStyle(help).display);
+    key("?");
+    check("? opens it", win.getComputedStyle(help).display !== "none");
+    doc.getElementById("help-close").dispatchEvent(
+      new win.MouseEvent("click", { bubbles: true, cancelable: true }));
+    check("close closes it",
+          win.getComputedStyle(help).display === "none",
+          win.getComputedStyle(help).display);
+    key("?");
+    key("Escape");
+    check("Escape closes it too",
+          win.getComputedStyle(help).display === "none",
+          win.getComputedStyle(help).display);
+    var keys = doc.getElementById("help-keys").textContent;
+    check("the sheet prints the key that actually works",
+          keys.indexOf("⇧S") >= 0 && keys.indexOf("⇧G") >= 0,
+          keys.replace(/\s+/g, " ").slice(0, 160));
+    return null;
+  });
+}
+
+function answerElements(depth) {
+  if (depth > 64) return Promise.reject(new Error("the element pass never ended"));
+  if (Object.keys(win.st.state.elements || {}).length >= win.st.sampled.length) {
+    return settled();
+  }
+  key(keyFor("element", "ok"));
+  return settled().then(function () { return answerElements(depth + 1); });
+}
+})();
+</script>
+</body>
+</html>

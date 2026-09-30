@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: "If you use DeskForge or DeskForge-1M, please cite it as below."
+title: "DeskForge: Dense Supervision from Desktop Environments for Computer-Use Agents"
+type: software
+authors:
+  - given-names: "A. Said"
+    family-names: "Gurbuz"
+    affiliation: "ETH Zurich; IBM Research Zurich"
+  - given-names: "Ahmed"
+    family-names: "Nassar"
+    affiliation: "IBM Research Zurich"
+  - given-names: "Sunghwan"
+    family-names: "Hong"
+    affiliation: "ETH Zurich"
+  - given-names: "Marc"
+    family-names: "Pollefeys"
+    affiliation: "ETH Zurich; Microsoft"
+  - given-names: "Peter W. J."
+    family-names: "Staar"
+    affiliation: "IBM Research Zurich"
+url: "https://saidgurbuz.github.io/deskforge/"
+repository-code: "https://github.com/Saidgurbuz/deskforge"
+version: "1.0.0"

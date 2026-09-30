@@ -1,0 +1,104 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>deskshot audit</title>
+<link rel="stylesheet" href="/static/app.css">
+<link rel="stylesheet" href="/static/audit.css">
+<body>
+<header id="bar">
+  <span class="brand">deskshot <b>audit</b></span>
+  <select id="campaign" title="campaign"></select>
+  <span id="counter" class="counter"></span>
+  <div id="track" title="every item; green done, amber skipped"></div>
+  <span class="spacer"></span>
+  <span id="saved" class="saved">ready</span>
+  <span id="rater" class="muted"></span>
+  <button id="help-open" class="ghost" title="keys (?)">?</button>
+  <a class="plain" href="/corpus">corpus →</a>
+</header>
+
+<main>
+  <section id="board">
+    <div id="viewport">
+      <canvas id="canvas"></canvas>
+      <canvas id="loupe" width="220" height="220"></canvas>
+      <div id="board-note"></div>
+    </div>
+    <div id="boardbar">
+      <span id="passes"></span>
+      <span class="spacer"></span>
+      <label><input type="checkbox" id="opt-boxes" checked> boxes <kbd>b</kbd></label>
+      <label><input type="checkbox" id="opt-labels"> labels <kbd>l</kbd></label>
+      <label><input type="checkbox" id="opt-frags" checked> visible parts <kbd>v</kbd></label>
+      <label><input type="checkbox" id="opt-loupe"> loupe <kbd>x</kbd></label>
+      <span id="zoomlevel" class="muted"></span>
+      <button id="fit" class="ghost" title="fit (f)">fit</button>
+    </div>
+  </section>
+
+  <aside id="side">
+    <section id="prompt">
+      <h2 id="pass-title"></h2>
+      <p id="pass-help" class="muted"></p>
+      <div id="options"></div>
+      <div id="pass-extra"></div>
+    </section>
+
+    <section id="element" hidden>
+      <h2>element <span id="element-count" class="muted"></span></h2>
+      <table id="element-table"></table>
+    </section>
+
+    <section id="answers">
+      <h2>this item</h2>
+      <div id="answer-list"></div>
+      <div class="row buttons">
+        <button id="skip" class="ghost" title="skip with a reason (s)">skip</button>
+        <button id="back" class="ghost" title="step back and answer again (u / Backspace)">back</button>
+        <button id="next" title="next item (Enter / n)">next →</button>
+      </div>
+    </section>
+
+    <section id="facts">
+      <h2>item</h2>
+      <table id="fact-table"></table>
+      <details id="automated">
+        <summary>what the automated audits said <span class="muted">(g)</span></summary>
+        <div id="automated-body"></div>
+        <p class="muted tiny">Collapsed on purpose: this is a machine estimate
+          of the same thing you are judging, so reading it first would anchor
+          the answer instead of testing it.</p>
+      </details>
+      <details id="screentag">
+        <summary>ScreenTag</summary>
+        <div id="screentag-body"></div>
+      </details>
+      <details id="provenance">
+        <summary>provenance</summary>
+        <div id="provenance-body"></div>
+      </details>
+    </section>
+  </aside>
+</main>
+
+<div id="help" hidden>
+  <div class="sheet">
+    <h2>keys</h2>
+    <table id="help-keys"></table>
+    <h2>how an item works</h2>
+    <ol>
+      <li><b>missed</b> — boxes are hidden on purpose. Click anything visible
+        that has no box, then <kbd>Enter</kbd>. You cannot see what is not drawn
+        on a screen already covered in boxes, so this pass comes first.</li>
+      <li><b>screen</b> — a few one-key judgements about the whole annotation.</li>
+      <li><b>elements</b> — the sampled elements, one at a time.
+        <kbd>a</kbd> is correct and moves on; any other flag accumulates and
+        <kbd>Enter</kbd> commits, so an element can be both misclassified and
+        mislocalized.</li>
+    </ol>
+    <p class="muted">Every answer is saved the moment you press the key. There is
+      no save button and nothing is written to the corpus.</p>
+    <button id="help-close">close</button>
+  </div>
+</div>
+
+<script src="/static/audit.js"></script>

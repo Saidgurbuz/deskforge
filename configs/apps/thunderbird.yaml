@@ -1,0 +1,26 @@
+app_name: thunderbird
+binary: thunderbird-bin
+atspi_name: thunderbird
+env:
+  ACCESSIBILITY_ENABLED: "1"
+  GNOME_ACCESSIBILITY: "1"
+  MOZ_ACCESSIBILITY_FORCE_DISABLED: "0"
+args:
+  - "--no-remote"
+  - "--profile"
+  - "/tmp/session_thunderbird_profile"
+  - "-mail"
+window_titles:
+  - Thunderbird
+interactions:
+  - name: default
+    description: Default Thunderbird window
+    actions:
+      - type: wait
+        value: "3.0"
+
+  - name: local_inbox
+    description: Open the seeded local Inbox message list
+    actions:
+      - type: wait
+        value: "5.0"
