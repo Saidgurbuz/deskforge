@@ -617,6 +617,7 @@ to the screen before and after it.
 | Observations | 1,207,368 screenshots in 323,731 scenes |
 | Element instances | 159.7M (132 per screen on average) |
 | Click transitions | 917,211, from 135,731 exploration episodes |
+| Instructions | 663,635 clicks with natural-language instructions |
 | Applications | 19 real Linux desktop applications, several per screen |
 | Appearance | 7 presets, from classic Linux to Windows- and macOS-inspired styles |
 | Resolutions | 7, from 1366×768 to 3840×2160 |
@@ -627,14 +628,14 @@ Splits are made per **scene**, so all frames of a scene stay together. Three tes
 splits hold an attribute out of training **entirely**, which measures
 generalization to desktop configurations never seen in training.
 
-| split | held out | observations | transitions |
-| --- | --- | ---: | ---: |
-| `train` | | 999,494 | 760,850 |
-| `val` | | 11,279 | 8,667 |
-| `test_id` | new scenes with seen attributes | 22,550 | 17,383 |
-| `test_app` | GNOME System Monitor, Pluma, Xarchiver | 43,206 | 32,848 |
-| `test_theme` | the Quartz Night Nord preset | 51,627 | 38,671 |
-| `test_resolution` | 2880×1800 | 79,212 | 58,792 |
+| split | held out | observations | transitions | instructions |
+| --- | --- | ---: | ---: | ---: |
+| `train` | | 999,494 | 760,850 | 551,651 |
+| `val` | | 11,279 | 8,667 | 6,281 |
+| `test_id` | new scenes with seen attributes | 22,550 | 17,383 | 12,589 |
+| `test_app` | GNOME System Monitor, Pluma, Xarchiver | 43,206 | 32,848 | 22,729 |
+| `test_theme` | the Quartz Night Nord preset | 51,627 | 38,671 | 27,175 |
+| `test_resolution` | 2880×1800 | 79,212 | 58,792 | 43,210 |
 
 A held-out application is excluded from every scene that contains it, in any
 frame. See [`docs/splits.md`](docs/splits.md) for how each axis was chosen.
@@ -652,11 +653,13 @@ observation is four members sharing one key:
 | `record.json` | scene metadata (applications, preset, resolution, window stack), eligibility flags, and the action that produced this state |
 
 Alongside the shards, `index/` holds Parquet tables for observations,
-transitions, episodes and scenes: `index/transitions/<split>.parquet` lists every
-recorded click with its before and after observation keys, target element and
-effect. `demo/` holds browsing samples: stratified observations with images
-inline (downscaled to 1024 px) and the `transitions_preview` shards below. The
-field reference is in [`docs/schema.md`](docs/schema.md).
+transitions, instructions, episodes and scenes:
+`index/transitions/<split>.parquet` lists every recorded click with its before
+and after observation keys, target element and effect, and
+`index/instructions/<split>.parquet` gives the clicks their natural-language
+instructions. `demo/` holds browsing samples: stratified observations with
+images inline (downscaled to 1024 px) and the `transitions_preview` shards
+below. The field reference is in [`docs/schema.md`](docs/schema.md).
 
 ### Browsing transitions
 
@@ -675,9 +678,9 @@ types, appearance presets and resolutions. A row reads as one step:
 
 Screenshots are byte-identical copies of the corpus members. Instructions are
 synthesized from each recorded click and its before and after screens; the
-preview shows instructions that an independent grounding model located on the
-before screen alone. It is a sample for browsing: all 917,211 transitions are
-read through `index/transitions` and the shards.
+preview shows instructions that passed the round-trip check described under
+[Instructions](#instructions). It is a sample for browsing: all transitions and
+instructions are read through `index/` and the shards.
 
 ## Loading
 
@@ -696,6 +699,13 @@ preview = load_dataset("docling-project/DeskForge-1M", "transitions_preview", sp
 transitions = load_dataset(
     "parquet",
     data_files="hf://datasets/docling-project/DeskForge-1M/index/transitions/val.parquet",
+    split="train",
+)
+
+# Instructions: one row per click, joined to transitions by transition_id.
+instructions = load_dataset(
+    "parquet",
+    data_files="hf://datasets/docling-project/DeskForge-1M/index/instructions/val.parquet",
     split="train",
 )
 ```
@@ -723,22 +733,42 @@ transitions and fetching a single observation by key.
 `transition_train_eligible` selects the action view, which keeps no-op clicks as
 supervision.
 
+## Instructions
+
+663,635 recorded clicks come with natural-language instructions,
+synthesized with Qwen3.6-27B from the click, its target and the screens before
+and after it. An instruction states one coordinate-free goal that can be carried
+out from the before screen, in a `standard` and a more `detailed_contextual`
+style; `primary_instruction` is the standard one where it exists, and
+`referring_expression` describes the target on the before screen. The
+551,651 training instructions are the pool for grounding training, and
+the 105,703 in the four test splits are the grounding evaluation examples.
+
+Each variant also records `roundtrip`: whether an independent grounding model
+(UI-TARS-1.5-7B), given only the unmarked before screen and the instruction,
+points inside the target. It is a strict geometric check, reported rather than
+applied; `primary_roundtrip_pass` selects the subset whose primary instruction
+passed. Counts and source hashes are in `index/instructions/manifest.json`.
+
 ## Annotation quality
 
 Annotations are generated automatically from the accessibility tree and
 reconciled with the screenshot and the window stack. Captures that fail the
 automated audits (element coverage against rendered pixels, blank-widget
 suppression, window ownership and fragment containment) are not included. A
-human audit finds **99.8%** of sampled element annotations correct.
+human audit finds **99.8%** of sampled element annotations correct and
+**97.8%** of sampled instructions sound; instructions are model-generated and
+are not verified row by row.
 
 ## Limitations
 
 All screenshots come from one Linux backend (Xfce): the Windows- and
 macOS-inspired presets reproduce the look of those systems rather than run them.
 Actions are clicks from undirected exploration, not goal-directed
-demonstrations. Because annotations transcribe what is on screen, text drawn by
-applications (for example session paths or live web content in browser scenes)
-is part of the data.
+demonstrations; instructions are written for single clicks after the fact.
+Because annotations transcribe what is on screen, text drawn by applications
+(for example session paths or live web content in browser scenes) is part of the
+data.
 
 ## License
 

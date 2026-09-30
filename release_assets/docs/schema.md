@@ -69,6 +69,7 @@ observation that an action led to — `action_into_this_state` and
 | `index/scenes.parquet` | scene | `split`, `split_source`, `apps`, `theme`, `resolution` |
 | `index/observations/<split>.parquet` | observation | `tar_path`, `*_member`, `occluded_ratio`, `n_elements`, `n_windows`, the flags |
 | `index/transitions/<split>.parquet` | transition | `before_key`, `after_key`, action fields, `effect`, `exclusion_reasons` |
+| `index/instructions/<split>.parquet` | transition with an instruction | `primary_instruction`, `instruction_variants`, `referring_expression`, `primary_roundtrip_pass` |
 | `index/episodes/<split>.parquet` | episode | `observation_keys`, `transition_ids`, `episode_status` |
 | `index/shard_members.parquet` | tar member | `byte_offset`, `byte_size`, `sha256` |
 | `checksums/shard_stats.parquet` | tar | `bytes`, `sha256`, `observations` |
@@ -99,6 +100,27 @@ Coordinates: `action_point_px` is authoritative. `action_point_norm_1000` and
 `exclusion_reasons` is empty when `transition_train_eligible` is true and
 otherwise names every rule the transition failed, so a count can always be
 accounted for.
+
+## Instructions
+
+`index/instructions/<split>.parquet` has one row per transition with an
+instruction, joined to the corpus by `transition_id`, `before_key` and
+`after_key`:
+
+| column | content |
+| --- | --- |
+| `transition_id`, `split`, `before_key`, `after_key`, `target_uid` | the transition and its target element |
+| `action_type`, `action_point_px`, `action_target_bbox_px` | the recorded click, as in `index/transitions` |
+| `primary_style`, `primary_instruction` | the main instruction: `standard` where it exists, else `detailed_contextual` |
+| `instruction_variants` | every kept phrasing: `style`, `text` and `roundtrip` (`pass` or `fail`) |
+| `referring_expression` | how the target is identified on the before screen |
+| `primary_roundtrip_pass` | whether the primary instruction passed the round trip |
+
+Instructions are coordinate-free: they name a goal, never a position. The round
+trip gives an independent grounding model (UI-TARS-1.5-7B) only the unmarked
+before screen and one instruction, and passes when its point falls inside the
+target's visible fragments. `manifest.json` records per-split counts, file
+hashes and the source hashes.
 
 ## `demo/preview.parquet`
 
