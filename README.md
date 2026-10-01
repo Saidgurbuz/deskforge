@@ -37,6 +37,14 @@ instances and 917K recorded click transitions.
 </tr>
 </table>
 
+## Demo
+
+<!-- DEMO VIDEO: replace this line with the uploaded video link (https://github.com/user-attachments/assets/...) -->
+
+*The same planner drives InternVL3.5-8B before (left) and after (right)
+fine-tuning on DeskForge-1M, on a WebArena-Infinity GitLab task. The full demo
+is on the [project page](https://saidgurbuz.github.io/deskforge/).*
+
 ## Contents
 
 - [Installation](#installation)
