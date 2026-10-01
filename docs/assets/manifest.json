@@ -940,6 +940,15 @@
      ]
     }
    ]
+  },
+  "overview-svg": {
+   "source": "figures/deskforge_overview.pdf",
+   "source_sha256": "8c539eff7af313e80539125aeb737d2b9182d6bc38ab74cf2e601d4d65499e3e",
+   "outputs": [
+    {
+     "file": "assets/img/overview.svg"
+    }
+   ]
   }
  },
  "video": {

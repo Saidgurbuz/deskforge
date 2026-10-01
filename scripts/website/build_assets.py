@@ -9,7 +9,10 @@ Writes into docs/assets/. Needs pymupdf, pillow and ffmpeg (on PATH, or set
 DESKFORGE_FFMPEG). The paper repository is not part of this repository.
 """
 import argparse
+import base64
+import io
 import os
+import re
 import hashlib
 import json
 import shutil
@@ -48,6 +51,12 @@ PDFS = [
     ("figures/grounding_failures/gf_legend.pdf", "failures/gf_legend", 2000),
 ]
 
+# PDFs also exported as SVG: text and shapes stay vector, so the figure is sharp at any zoom.
+# The width is the SVG's natural width (what the lightbox shows); it still scales from the viewBox.
+SVGS = [
+    ("figures/deskforge_overview.pdf", "overview", 2400),
+]
+
 
 def sha(p):
     return hashlib.sha256(Path(p).read_bytes()).hexdigest()
@@ -61,6 +70,26 @@ def save_webp(im, stem, width, quality=86):
         im = im.resize((width, round(im.height * width / im.width)), Image.LANCZOS)
     im.save(out, "WEBP", quality=quality, method=6)
     return out, im.size
+
+
+def pdf_to_svg(pdf, out, width):
+    """Vector SVG of a one-page PDF: glyphs as paths, embedded rasters re-encoded as WebP, white ground."""
+    page = pymupdf.open(pdf)[0]
+    svg = page.get_svg_image(matrix=pymupdf.Identity, text_as_path=True)
+    height = width * page.rect.height / page.rect.width
+    svg = re.sub(r'(<svg[^>]*?) width="[^"]*" height="[^"]*"', rf'\1 width="{width}" height="{height:.2f}"', svg, count=1)
+
+    def webp(m):
+        im = Image.open(io.BytesIO(base64.b64decode(re.sub(r"\s", "", m.group(2)))))
+        im = im.convert("RGBA" if im.mode in ("RGBA", "LA", "P") else "RGB")
+        buf = io.BytesIO()
+        im.save(buf, "WEBP", quality=92, method=6)
+        return m.group(1) + "data:image/webp;base64," + base64.b64encode(buf.getvalue()).decode() + '"'
+
+    svg = re.sub(r'(<image[^>]*?href=")data:image/png;base64,([^"]+)"', webp, svg, flags=re.S)
+    svg = re.sub(r"(<svg[^>]*>)", r'\1\n<rect width="100%" height="100%" fill="#fff"/>', svg, count=1)
+    out.write_text(svg)
+    return out
 
 
 def main():
@@ -94,6 +123,11 @@ def main():
             out, size = save_webp(im, stem, w, quality=90)
             outs.append({"file": str(out.relative_to(SITE)), "size": list(size)})
         manifest["images"][stem] = {"source": src, "source_sha256": sha(p), "rendered_from_pdf": True, "outputs": outs}
+
+    for src, stem, width in SVGS:
+        p = paper / src
+        out = pdf_to_svg(p, IMG / f"{stem}.svg", width)
+        manifest["images"][f"{stem}-svg"] = {"source": src, "source_sha256": sha(p), "outputs": [{"file": str(out.relative_to(SITE))}]}
 
     # Link-preview card (Open Graph / Twitter): 1200x630 JPEG, overview figure centered on white.
     page = pymupdf.open(paper / "figures/deskforge_overview.pdf")[0]
