@@ -12,7 +12,7 @@
 
 <sup>1</sup>ETH Zurich · <sup>2</sup>IBM Research Zurich · <sup>3</sup>Microsoft
 
-[**Project page**](https://saidgurbuz.github.io/deskforge/) · **Paper** (coming soon) · **DeskForge-1M** (coming soon) · **Models** (coming soon)
+[**Project page**](https://saidgurbuz.github.io/deskforge/) · **Paper** (coming soon) · [**DeskForge-1M**](https://huggingface.co/datasets/docling-project/DeskForge-1M) · [**Model**](https://huggingface.co/docling-project/DeskForge-Qwen3.5-4B)
 
 <img src="docs/assets/img/overview-2400.webp" alt="DeskForge overview" width="100%">
 
