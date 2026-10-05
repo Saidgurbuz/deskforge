@@ -594,7 +594,8 @@ desktop environment that composes and explores real applications.
 
 [**Project page**](https://saidgurbuz.github.io/deskforge/) ·
 [**Code**](https://github.com/Saidgurbuz/deskforge) ·
-[**Model**](https://huggingface.co/docling-project/DeskForge-Qwen3.5-4B) · [**Paper**](https://arxiv.org/abs/2610.02320)
+[**DeskForge-Qwen3.5-4B**](https://huggingface.co/docling-project/DeskForge-Qwen3.5-4B) ·
+[**DeskForge-Gemma4-E4B**](https://huggingface.co/docling-project/DeskForge-Gemma4-E4B) · [**Paper**](https://arxiv.org/abs/2610.02320)
 
 A. Said Gurbuz · Ahmed Nassar · Sunghwan Hong · Marc Pollefeys · Peter W. J. Staar
 <br>ETH Zurich · IBM Research Zurich · Microsoft

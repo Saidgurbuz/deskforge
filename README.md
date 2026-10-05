@@ -12,7 +12,7 @@
 
 <sup>1</sup>ETH Zurich · <sup>2</sup>IBM Research Zurich · <sup>3</sup>Microsoft
 
-[**Project page**](https://saidgurbuz.github.io/deskforge/) · [**Paper**](https://arxiv.org/abs/2610.02320) · [**DeskForge-1M**](https://huggingface.co/datasets/docling-project/DeskForge-1M) · [**Model**](https://huggingface.co/docling-project/DeskForge-Qwen3.5-4B)
+[**Project page**](https://saidgurbuz.github.io/deskforge/) · [**Paper**](https://arxiv.org/abs/2610.02320) · [**DeskForge-1M**](https://huggingface.co/datasets/docling-project/DeskForge-1M) · [**DeskForge-Qwen3.5-4B**](https://huggingface.co/docling-project/DeskForge-Qwen3.5-4B) · [**DeskForge-Gemma4-E4B**](https://huggingface.co/docling-project/DeskForge-Gemma4-E4B)
 
 <img src="docs/assets/img/overview-2400.webp" alt="DeskForge overview" width="100%">
 
