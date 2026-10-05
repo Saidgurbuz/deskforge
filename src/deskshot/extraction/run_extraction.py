@@ -2977,7 +2977,6 @@ def _apply_filtering(
             max_box_size=config.max_box_size,
         )
     except ImportError:
-        logger.warning("webshot.filtering not available, skipping filtering")
         return elements
 
 
