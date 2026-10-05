@@ -123,10 +123,6 @@ python3 scripts/render_annotations.py runs/first_scene --out runs/first_scene_vi
 python3 scripts/inspect_annotations.py        # http://localhost:8000
 ```
 
-Extraction logs `webshot.filtering not available, skipping filtering` once per
-capture. This is expected: that optional element filter from ScreenParse is not
-part of DeskForge, and DeskForge-1M was generated without it.
-
 ## What a capture contains
 
 Every observation is written as a set of files sharing one stem:
