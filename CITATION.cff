@@ -21,3 +21,28 @@ authors:
 url: "https://saidgurbuz.github.io/deskforge/"
 repository-code: "https://github.com/Saidgurbuz/deskforge"
 version: "1.0.0"
+preferred-citation:
+  type: article
+  title: "DeskForge: Dense Supervision from Desktop Environments for Computer-Use Agents"
+  authors:
+    - given-names: "A. Said"
+      family-names: "Gurbuz"
+      affiliation: "ETH Zurich; IBM Research Zurich"
+    - given-names: "Ahmed"
+      family-names: "Nassar"
+      affiliation: "IBM Research Zurich"
+    - given-names: "Sunghwan"
+      family-names: "Hong"
+      affiliation: "ETH Zurich"
+    - given-names: "Marc"
+      family-names: "Pollefeys"
+      affiliation: "ETH Zurich; Microsoft"
+    - given-names: "Peter W. J."
+      family-names: "Staar"
+      affiliation: "IBM Research Zurich"
+  year: 2026
+  journal: "arXiv preprint arXiv:2610.02320"
+  url: "https://arxiv.org/abs/2610.02320"
+  identifiers:
+    - type: doi
+      value: "10.48550/arXiv.2610.02320"

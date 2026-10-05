@@ -594,7 +594,7 @@ desktop environment that composes and explores real applications.
 
 [**Project page**](https://saidgurbuz.github.io/deskforge/) ·
 [**Code**](https://github.com/Saidgurbuz/deskforge) ·
-[**Model**](https://huggingface.co/docling-project/DeskForge-Qwen3.5-4B) · **Paper** (coming soon)
+[**Model**](https://huggingface.co/docling-project/DeskForge-Qwen3.5-4B) · [**Paper**](https://arxiv.org/abs/2610.02320)
 
 A. Said Gurbuz · Ahmed Nassar · Sunghwan Hong · Marc Pollefeys · Peter W. J. Staar
 <br>ETH Zurich · IBM Research Zurich · Microsoft
@@ -768,12 +768,13 @@ remain the property of their respective owners.
 ## Citation
 
 ```bibtex
-@article{gurbuz2026deskforge,
-  title   = {DeskForge: Dense Supervision from Desktop Environments
-             for Computer-Use Agents},
-  author  = {Gurbuz, A. Said and Nassar, Ahmed and Hong, Sunghwan and
-             Pollefeys, Marc and Staar, Peter W. J.},
-  journal = {arXiv preprint},
-  year    = {2026}
+@misc{gurbuz2026deskforge,
+      title={DeskForge: Dense Supervision from Desktop Environments for Computer-Use Agents},
+      author={A. Said Gurbuz and Ahmed Nassar and Sunghwan Hong and Marc Pollefeys and Peter W. J. Staar},
+      year={2026},
+      eprint={2610.02320},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      url={https://arxiv.org/abs/2610.02320},
 }
 ```
