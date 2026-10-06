@@ -37,7 +37,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&family=Source+Serif+4:opsz,wght@8..60,400..700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/style.css">
-<link rel="preload" as="image" href="assets/img/overview.svg">
+<link rel="preload" as="image" href="assets/video/intro-poster-1920.webp">
 <script>try{var t=localStorage.getItem("df-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 </head>
 <body>
@@ -88,10 +88,12 @@
   </div>
   <div class="wrap-wide teaser">
     <figure>
-      <div class="frame zoomable" data-full="assets/img/overview.svg">
-        <img src="assets/img/overview.svg" width="2400" height="1133" alt="Overview of DeskForge: a scene specification configures the desktop, real applications are launched and explored, screenshots, accessibility trees and window stacks yield dense annotations, and annotated states and transitions form DeskForge-1M." fetchpriority="high">
+      <div class="video-card">
+        <video id="hero-video" muted loop playsinline controls preload="auto" poster="assets/video/intro-poster-1920.webp" data-cover="assets/video/intro-cover-1920.webp" width="1920" height="1080" aria-label="DeskForge in one minute: a composed desktop is annotated element by element, split into its window layers and clicked through step by step, followed by hundreds of annotated desktops, DeskForge-1M at a glance, a long-horizon task demo, and the results.">
+          <source src="assets/video/deskforge_intro.mp4" type="video/mp4">
+        </video>
       </div>
-      <figcaption class="wrap" style="padding:0"><b>Overview of DeskForge and DeskForge-1M.</b> (a) A scene specification configures the desktop. (b) Real applications are launched and explored. (c) Screenshots, accessibility trees, and window stacks yield dense annotations. (d) Annotated states and transitions form DeskForge-1M.</figcaption>
+      <figcaption class="wrap" style="padding:0"><b>DeskForge in one minute.</b> A composed desktop is annotated element by element, split into its window layers, and clicked through step by step; then hundreds of annotated desktops, DeskForge-1M at a glance, a long-horizon task demo, and the results.</figcaption>
     </figure>
   </div>
   <div class="wrap">
@@ -152,6 +154,16 @@
         <a href="#composition">Scene composition</a><a href="#appearance">Appearance</a><a href="#annotations">Dense annotations</a><a href="#screentag">ScreenTag</a><a href="#interaction">Interaction recording</a>
       </nav>
     </header>
+  </div>
+  <div class="wrap-wide teaser reveal">
+    <figure>
+      <div class="frame zoomable" data-full="assets/img/overview.svg">
+        <img src="assets/img/overview.svg" width="2400" height="1133" alt="Overview of DeskForge: a scene specification configures the desktop, real applications are launched and explored, screenshots, accessibility trees and window stacks yield dense annotations, and annotated states and transitions form DeskForge-1M." loading="lazy">
+      </div>
+      <figcaption class="wrap" style="padding:0"><b>Overview of DeskForge and DeskForge-1M.</b> (a) A scene specification configures the desktop. (b) Real applications are launched and explored. (c) Screenshots, accessibility trees, and window stacks yield dense annotations. (d) Annotated states and transitions form DeskForge-1M.</figcaption>
+    </figure>
+  </div>
+  <div class="wrap">
 
     <div class="sub" id="composition">
       <h3 class="reveal">Controllable scene composition</h3>

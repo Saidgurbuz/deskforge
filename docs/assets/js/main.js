@@ -131,6 +131,22 @@
   });
 
   /* ---------- video ---------- */
+  // Play (muted) while on screen, pause when scrolled away, unless the viewer took control.
+  // With reduced motion, or where autoplay is refused, the video stays paused on its cover frame.
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const playWhileVisible = (v, threshold) => {
+    const cover = () => { if (v.dataset.cover && v.currentTime === 0) v.poster = v.dataset.cover; };
+    if (reduce) cover();
+    let userPaused = false;
+    v.addEventListener("pause", () => { if (!document.hidden && v.dataset.auto !== "1") userPaused = true; v.dataset.auto = ""; });
+    v.addEventListener("play", () => { userPaused = false; });
+    new IntersectionObserver(es => es.forEach(e => {
+      if (e.isIntersecting && !userPaused && !reduce) { v.play().catch(cover); }
+      else if (!e.isIntersecting && !v.paused) { v.dataset.auto = "1"; v.pause(); }
+    }), { threshold }).observe(v);
+  };
+  const hero = $("#hero-video");
+  if (hero) playWhileVisible(hero, 0.25);
   const vid = $("#demo-video");
   if (vid) {
     const chips = $$(".chapters .chip");
@@ -139,15 +155,7 @@
       let k = 0; chips.forEach((c, i) => { if (vid.currentTime + 0.25 >= +c.dataset.t) k = i; });
       chips.forEach((c, i) => c.classList.toggle("on", i === k));
     });
-    // Play (muted) while on screen, pause when scrolled away, unless the viewer took control.
-    let userPaused = false;
-    vid.addEventListener("pause", () => { if (!document.hidden && vid.dataset.auto !== "1") userPaused = true; vid.dataset.auto = ""; });
-    vid.addEventListener("play", () => { userPaused = false; });
-    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    new IntersectionObserver(es => es.forEach(e => {
-      if (e.isIntersecting && !userPaused && !reduce) { vid.play().catch(() => {}); }
-      else if (!e.isIntersecting && !vid.paused) { vid.dataset.auto = "1"; vid.pause(); }
-    }), { threshold: 0.45 }).observe(vid);
+    playWhileVisible(vid, 0.45);
   }
 
   /* ---------- lightbox ---------- */

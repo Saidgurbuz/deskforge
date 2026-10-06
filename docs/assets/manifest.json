@@ -955,6 +955,21 @@
   "long_horizon.mp4": {
    "source_sha256": "f9ad3643133e3b2c15b0b87186dd1f60ff2fc71f3a05bb219acaadc348e39f49",
    "output_sha256": "f9ad3643133e3b2c15b0b87186dd1f60ff2fc71f3a05bb219acaadc348e39f49"
+  },
+  "deskforge_intro.mp4": {
+   "source": "promo video v7, silent 60 fps master (deskforge_promo_v7_60fps_silent.mp4), copied unchanged",
+   "source_sha256": "49a2dc438504e64a9758ed87172da754e23ad3b4170ded15b9c3bb46f9ab7d7a",
+   "output_sha256": "49a2dc438504e64a9758ed87172da754e23ad3b4170ded15b9c3bb46f9ab7d7a"
+  },
+  "intro-poster-1920.webp": {
+   "source": "deskforge_intro.mp4, frame at 0.0 s",
+   "source_sha256": "49a2dc438504e64a9758ed87172da754e23ad3b4170ded15b9c3bb46f9ab7d7a",
+   "output_sha256": "12ccc765cd4994de5efc7cd68b7fb7ef5967ca0e1125cdae719ad7899871cd49"
+  },
+  "intro-cover-1920.webp": {
+   "source": "deskforge_intro.mp4, frame at 2.6 s (title cover)",
+   "source_sha256": "49a2dc438504e64a9758ed87172da754e23ad3b4170ded15b9c3bb46f9ab7d7a",
+   "output_sha256": "0ddae214ce5ec65f1872e189fc1019cc5f10d57e608dc473834b8d7d004ae4bb"
   }
  }
 }
