@@ -222,6 +222,7 @@ a.ref::after { content: "↗"; font-size: 11px; color: var(--muted); margin-left
 @media (max-width: 480px) { .stat { padding: 16px 6px; } .stat .v { font-size: 25px; } .stat .l { font-size: 12px; } }
 
 .abstract p { font-size: 17px; line-height: 1.75; color: var(--ink-2); }
+@media (min-width: 641px) { .abstract p { text-align: justify; -webkit-hyphens: auto; hyphens: auto; } }
 
 /* ---------- cards / figures ---------- */
 figure { margin: 0; }
